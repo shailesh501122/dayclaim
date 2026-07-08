@@ -6,5 +6,6 @@ chrome-dom.txt
 chrome-err.txt
 login-*.png
 navbar-*.png
+uat-*.png
 .env
 .env.*
