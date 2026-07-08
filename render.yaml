@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: dayclaim
+    runtime: static
+    branch: main
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
