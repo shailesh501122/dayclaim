@@ -1,0 +1,215 @@
+.datatable-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(46, 33, 112, .07);
+  overflow: hidden;
+}
+
+.datatable-title {
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.datatable-title h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.datatable-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.datatable-left {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.datatable-left span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.datatable-left select {
+  border: 1px solid #d8dae7;
+  border-radius: 7px;
+  min-height: 30px;
+  padding: 5px 7px;
+}
+
+.datatable-search {
+  align-items: center;
+  border: 1px solid #d8dae7;
+  border-radius: 9px;
+  display: flex;
+  gap: 7px;
+  min-height: 34px;
+  min-width: 240px;
+  padding: 0 9px;
+}
+
+.datatable-search input {
+  border: 0;
+  min-width: 0;
+  outline: 0;
+  width: 100%;
+}
+
+.table-scroll {
+  overflow: auto;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  padding: 8px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: var(--table-head);
+  color: #31265f;
+  font-size: 12px;
+  font-weight: 800;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+th .sort {
+  color: #8e86ba;
+  font-size: 9px;
+  margin-left: 5px;
+}
+
+.filter-head th {
+  top: 33px;
+}
+
+.filter-head input,
+.filter-head select {
+  border: 1px solid #d8dae7;
+  border-radius: 6px;
+  font-size: 12px;
+  min-height: 27px;
+  padding: 4px 6px;
+  width: 100%;
+}
+
+tbody tr:nth-child(even) {
+  background: #fbfbfe;
+}
+
+tbody tr:hover {
+  background: var(--hover);
+}
+
+td.numeric,
+th.numeric {
+  text-align: right;
+}
+
+.row-actions {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.row-actions button {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d8dae7;
+  border-radius: 7px;
+  color: var(--brand);
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.cell-progress {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 120px;
+}
+
+.cell-progress .progress-track {
+  height: 7px;
+  width: 74px;
+}
+
+.datatable-footer {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 12px;
+  font-weight: 600;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+}
+
+.pagination button {
+  background: #fff;
+  border: 1px solid #d8dae7;
+  border-radius: 7px;
+  color: #344054;
+  font-size: 12px;
+  min-height: 28px;
+  padding: 5px 8px;
+}
+
+.pagination .active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.empty-state {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  min-height: 160px;
+}
+
+.empty-state button {
+  background: var(--primary);
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 800;
+  padding: 8px 11px;
+}
+
+.compact th,
+.compact td {
+  padding: 7px 9px;
+}

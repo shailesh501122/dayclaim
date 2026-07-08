@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vite/
+*.log
+chrome-dom.txt
+chrome-err.txt
+login-*.png
+navbar-*.png
+.env
+.env.*
