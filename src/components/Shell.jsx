@@ -11,7 +11,6 @@ import {
   FileBarChart,
   FileInput,
   GitBranch,
-  HelpCircle,
   LayoutDashboard,
   Mail,
   Menu,
@@ -178,7 +177,6 @@ export function Shell({ children }) {
 
       {showFilterStrip && <FilterStrip />}
       {children}
-      <ToastStack />
     </div>
   );
 }
@@ -208,13 +206,5 @@ export function FilterStrip() {
         {['Today', 'WTD', 'MTD', 'QTD', 'YTD', 'Last 13 Months'].map((preset) => <button key={preset}>{preset}</button>)}
       </div>
     </section>
-  );
-}
-
-function ToastStack() {
-  return (
-    <div className="toast-stack">
-      <div className="toast"><HelpCircle size={16} /> Rule Engine Run is currently processing 12,077 claims.</div>
-    </div>
   );
 }
