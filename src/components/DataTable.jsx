@@ -64,7 +64,7 @@ export function DataTable({ title, columns, rows, filteredText = '4,283', totalT
       <div className="datatable-toolbar">
         <div className="datatable-left">
           <span>Show</span>
-          <select defaultValue="10"><option>10</option><option>25</option><option>50</option></select>
+          <select defaultValue="10"><option>10</option><option>25</option><option>50</option><option>100</option></select>
           <span>entries</span>
           {exportButtons.map(({ label, icon: Icon }) => (
             <button className="toolbar-button" key={label}><Icon size={14} /> {label}</button>

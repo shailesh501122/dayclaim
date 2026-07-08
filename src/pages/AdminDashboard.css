@@ -154,6 +154,103 @@
   justify-content: flex-end;
 }
 
+.module-control-card {
+  margin-top: 14px;
+}
+
+.module-control-title {
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin: -2px 0 14px;
+  padding-bottom: 12px;
+}
+
+.module-control-title div {
+  display: grid;
+  gap: 3px;
+}
+
+.module-control-title strong {
+  color: var(--brand);
+  font-size: 15px;
+}
+
+.module-control-title span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.module-control-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.module-control-grid.report-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.module-control-grid.master-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.module-control-grid label {
+  display: grid;
+  gap: 6px;
+}
+
+.module-control-grid label span {
+  color: #475569;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.module-control-grid input,
+.module-control-grid select {
+  background: #fff;
+  border: 1px solid #d8e5df;
+  border-radius: 9px;
+  color: var(--text);
+  min-height: 36px;
+  padding: 7px 9px;
+  width: 100%;
+}
+
+.module-radio-row {
+  align-items: center;
+  border-top: 1px dashed #d8e5df;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 14px;
+  padding-top: 12px;
+}
+
+.module-radio-row label {
+  align-items: center;
+  color: #344054;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.module-note {
+  background: #f0fbf6;
+  border: 1px solid #c8eadc;
+  border-radius: 10px;
+  color: #286f5a;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 12px 0 0;
+  padding: 9px 10px;
+}
+
 .insight-card {
   align-items: center;
   display: flex;
@@ -218,5 +315,24 @@
 
   .module-actions {
     justify-content: flex-start;
+  }
+
+  .module-control-grid,
+  .module-control-grid.report-grid,
+  .module-control-grid.master-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .module-control-grid,
+  .module-control-grid.report-grid,
+  .module-control-grid.master-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .module-control-title {
+    align-items: flex-start;
+    display: grid;
   }
 }

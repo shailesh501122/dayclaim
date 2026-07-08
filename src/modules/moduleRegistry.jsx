@@ -1,23 +1,13 @@
 import {
-  AiJobs,
   AllocationDashboard,
   ArAnalytics,
-  AssignmentApproval,
   BusinessMetrics,
-  ClientMaster,
-  EmployeeInfo,
   EscalationDashboard,
-  ImporterUpload,
   InventoryOverview,
   KpiMetrics,
-  ManualAssignment,
-  NotificationsCenter,
   PaymentTrend,
   PerformanceDashboard,
-  RoleAccess,
   RuleEngine,
-  ScenarioMaster,
-  UserRoleManagement,
 } from '../pages/AdminDashboard.jsx';
 import { ModulePage } from './shared/ModulePage.jsx';
 
@@ -40,17 +30,6 @@ const specialPages = {
   'Performance Dashboard': PerformanceDashboard,
   'Escalation Dashboard': EscalationDashboard,
   'Inventory Overview': InventoryOverview,
-  'Client Master': ClientMaster,
-  'Employee Info': EmployeeInfo,
-  'User Role Access': RoleAccess,
-  'User Role Management': UserRoleManagement,
-  'File Upload': ImporterUpload,
-  'Manual Assignment': ManualAssignment,
-  'Assignment Approval': AssignmentApproval,
-  'Manual Assignment Approval': AssignmentApproval,
-  'Scenario Master': ScenarioMaster,
-  'Jobs Dashboard': AiJobs,
-  'Notifications': NotificationsCenter,
 };
 
 export function RouteElement({ route }) {
