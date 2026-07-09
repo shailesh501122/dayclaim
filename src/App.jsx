@@ -1,15 +1,33 @@
+import { Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ModuleErrorBoundary } from './components/ErrorBoundary.jsx';
 import { Shell } from './components/Shell.jsx';
+import { AuthProvider } from './modules/auth/AuthContext.jsx';
 import { LoginPage } from './modules/auth/LoginPage.jsx';
+import { ProtectedRoute } from './modules/auth/ProtectedRoute.jsx';
 import { RouteElement } from './modules/moduleRegistry.jsx';
 import { ModulePage } from './modules/shared/ModulePage.jsx';
 import { getAllModuleRoutes } from './routes/menuRoutes.js';
 
 function AdminLayout({ children }) {
   return (
-    <Shell>
-      <main className="content">{children}</main>
-    </Shell>
+    <ProtectedRoute>
+      <Shell>
+        <main className="content">{children}</main>
+      </Shell>
+    </ProtectedRoute>
+  );
+}
+
+function ModuleRoute({ route }) {
+  return (
+    <AdminLayout>
+      <ModuleErrorBoundary resetKey={route.path}>
+        <Suspense fallback={<div className="section module-loading">Loading module...</div>}>
+          <RouteElement route={route} />
+        </Suspense>
+      </ModuleErrorBoundary>
+    </AdminLayout>
   );
 }
 
@@ -18,18 +36,16 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        {moduleRoutes.map((route) => (
-          <Route
-            key={route.path}
-            path={route.path}
-            element={<AdminLayout><RouteElement route={route} /></AdminLayout>}
-          />
-        ))}
-        <Route path="*" element={<AdminLayout><ModulePage title="Page Not Found" group="DayClaim.ai" /></AdminLayout>} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          {moduleRoutes.map((route) => (
+            <Route key={route.path} path={route.path} element={<ModuleRoute route={route} />} />
+          ))}
+          <Route path="*" element={<AdminLayout><ModulePage title="Page Not Found" group="DayClaim.ai" /></AdminLayout>} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

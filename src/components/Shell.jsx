@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Bell,
   Bot,
   BookOpen,
   BriefcaseBusiness,
   ChevronDown,
+  ChevronRight,
   ClipboardList,
   CreditCard,
   Database,
@@ -12,9 +13,11 @@ import {
   FileInput,
   GitBranch,
   LayoutDashboard,
-  Mail,
+  LogOut,
   Menu,
   Network,
+  PanelLeftClose,
+  PanelLeftOpen,
   PhoneCall,
   Radio,
   Search,
@@ -26,8 +29,10 @@ import {
   UserRound,
   Users,
   Workflow,
+  X,
 } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { useAuth } from '../modules/auth/AuthContext.jsx';
 import { menuGroups } from '../data/adminData.js';
 import { getRouteForMenu } from '../routes/menuRoutes.js';
 import './Shell.css';
@@ -61,122 +66,143 @@ function ParentMenuIcon({ label }) {
   return <Icon className="nav-parent-icon" size={15} strokeWidth={2.2} />;
 }
 
-function MenuContent({ group, onNavigate }) {
-  if (group.mega) {
+function matchesQuery(label, query) {
+  return label.toLowerCase().includes(query.trim().toLowerCase());
+}
+
+function SidebarGroup({ group, query, isOpen, onToggle, onNavigate }) {
+  const items = group.columns ? group.columns.flat() : group.items || [];
+
+  if (group.direct) {
+    if (query && !matchesQuery(group.label, query)) return null;
     return (
-      <div className="dropdown-panel mega-menu">
-        {group.columns.map((column, index) => (
-          <div key={index} className="mega-column">
-            {column.map((item) => (
-              <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
-                {item}
-              </NavLink>
-            ))}
-          </div>
-        ))}
-      </div>
+      <NavLink className="sidebar-link" onClick={onNavigate} to={getRouteForMenu(group)}>
+        <ParentMenuIcon label={group.label} />
+        <span className="sidebar-label">{group.label}</span>
+      </NavLink>
     );
   }
 
-  if (group.flyout) {
-    return (
-      <div className="dropdown-panel flyout-menu">
-        <div className="flyout-group">
-          <strong>Master 1</strong>
-          {group.columns[0].map((item) => (
-            <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
-              {item}
-            </NavLink>
-          ))}
-        </div>
-        <div className="flyout-group secondary">
-          <strong>Master 2</strong>
-          {group.columns[1].map((item) => (
-            <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
-              {item}
-            </NavLink>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!group.items) return null;
+  const filteredItems = query ? items.filter((item) => matchesQuery(item, query)) : items;
+  if (query && filteredItems.length === 0 && !matchesQuery(group.label, query)) return null;
+  const expanded = query ? true : isOpen;
 
   return (
-    <div className="dropdown-panel simple-menu">
-      {group.items.map((item) => (
-        <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
-          {item}
-        </NavLink>
-      ))}
+    <div className={`sidebar-group ${expanded ? 'is-open' : ''}`}>
+      <button
+        aria-expanded={expanded}
+        className="sidebar-group-toggle"
+        onClick={onToggle}
+        type="button"
+      >
+        <ParentMenuIcon label={group.label} />
+        <span className="sidebar-label">{group.label}</span>
+        <ChevronRight className="sidebar-caret" size={14} />
+      </button>
+      {expanded && (
+        <div className="sidebar-subnav">
+          {(query ? filteredItems : items).map((item) => (
+            <NavLink className="sidebar-sublink" key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+              {item}
+            </NavLink>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 export function Shell({ children }) {
-  const [openMenu, setOpenMenu] = useState(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState(null);
+  const [query, setQuery] = useState('');
   const location = useLocation();
+  const { user, logout } = useAuth();
   const showFilterStrip = location.pathname.startsWith('/dashboard');
 
-  const toggleMenu = (label, hasMenu) => {
-    if (!hasMenu) {
-      setOpenMenu(null);
-      return;
-    }
-    setOpenMenu((current) => (current === label ? null : label));
+  const closeMobile = () => setMobileOpen(false);
+
+  const toggleGroup = (label) => {
+    if (collapsed) setCollapsed(false);
+    setOpenGroup((current) => (current === label ? null : label));
   };
 
+  const initials = useMemo(() => {
+    const name = user?.username || 'Admin';
+    return name.slice(0, 2).toUpperCase();
+  }, [user]);
+
   return (
-    <div className={`app ${showFilterStrip ? 'has-dashboard-filters' : 'no-dashboard-filters'}`}>
-      <header className="topbar">
-        <Link className="brand" to="/dashboard/business-metrics">DayClaim.ai</Link>
-        <div className="topbar-actions">
-          <button className="top-icon" aria-label="Notifications"><Bell size={17} /><span>9</span></button>
-          <button className="top-icon" aria-label="Messages"><Mail size={17} /></button>
-          <button className="admin-menu"><UserRound size={17} /> Welcome, Admin <ChevronDown size={14} /></button>
-          <button className="top-icon" aria-label="Menu"><Menu size={18} /></button>
-        </div>
-      </header>
+    <div className={`app ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'} ${showFilterStrip ? 'has-dashboard-filters' : 'no-dashboard-filters'}`}>
+      {mobileOpen && <button aria-label="Close menu" className="sidebar-backdrop" onClick={closeMobile} type="button" />}
 
-      <nav className="menu-band" onMouseLeave={() => setOpenMenu(null)}>
-        <div className="menu-inner">
-          {menuGroups.map((group, index) => {
-            const hasMenu = !group.direct && (group.items || group.columns);
-            const isOpen = openMenu === group.label;
-            const alignRight = index > menuGroups.length - 6;
-            return (
-              <div
-                className={`nav-item ${isOpen ? 'is-open' : ''} ${alignRight ? 'align-right' : ''}`}
-                key={group.label}
-                onMouseEnter={() => hasMenu && setOpenMenu(group.label)}
-              >
-                {group.direct ? (
-                  <NavLink className="nav-link" onClick={() => setOpenMenu(null)} to={getRouteForMenu(group)}>
-                    <ParentMenuIcon label={group.label} />
-                    <span>{group.label}</span>
-                  </NavLink>
-                ) : (
-                  <button
-                    aria-expanded={isOpen}
-                    aria-haspopup="menu"
-                    onClick={() => toggleMenu(group.label, hasMenu)}
-                    type="button"
-                  >
-                    <ParentMenuIcon label={group.label} />
-                    <span>{group.label}</span>
-                    <ChevronDown className="nav-caret" size={13} />
-                  </button>
-                )}
-                {isOpen && hasMenu && <MenuContent group={group} onNavigate={() => setOpenMenu(null)} />}
-              </div>
-            );
-          })}
+      <aside className={`sidebar ${mobileOpen ? 'is-mobile-open' : ''}`}>
+        <div className="sidebar-header">
+          <Link className="brand" onClick={closeMobile} to="/dashboard/business-metrics">
+            <span className="brand-mark">DC</span>
+            <span className="sidebar-label brand-name">DayClaim.ai</span>
+          </Link>
+          <button
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="sidebar-collapse-toggle"
+            onClick={() => setCollapsed((v) => !v)}
+            type="button"
+          >
+            {collapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
+          </button>
+          <button aria-label="Close menu" className="sidebar-close" onClick={closeMobile} type="button">
+            <X size={18} />
+          </button>
         </div>
-      </nav>
 
-      {showFilterStrip && <FilterStrip />}
-      {children}
+        <div className="sidebar-search">
+          <Search size={14} />
+          <input
+            className="sidebar-label"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search modules..."
+            value={query}
+          />
+        </div>
+
+        <nav className="sidebar-nav">
+          {menuGroups.map((group) => (
+            <SidebarGroup
+              group={group}
+              isOpen={openGroup === group.label}
+              key={group.label}
+              onNavigate={closeMobile}
+              onToggle={() => toggleGroup(group.label)}
+              query={query}
+            />
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          <button className="sidebar-icon-button" title="Notifications" type="button">
+            <Bell size={16} /><span className="badge-dot">9</span>
+          </button>
+          <div className="sidebar-user">
+            <span className="sidebar-avatar">{initials}</span>
+            <div className="sidebar-label sidebar-user-info">
+              <strong>{user?.username || 'Admin'}</strong>
+              <small>Signed in</small>
+            </div>
+          </div>
+          <button className="sidebar-icon-button" onClick={logout} title="Log out" type="button">
+            <LogOut size={16} />
+          </button>
+        </div>
+      </aside>
+
+      <div className="app-main">
+        <button aria-label="Open menu" className="mobile-menu-toggle" onClick={() => setMobileOpen(true)} type="button">
+          <Menu size={18} />
+        </button>
+        {showFilterStrip && <FilterStrip />}
+        {children}
+      </div>
     </div>
   );
 }

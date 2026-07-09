@@ -340,6 +340,30 @@ button {
   z-index: 2;
 }
 
+.module-loading {
+  color: var(--muted);
+  font-weight: 700;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.module-error {
+  align-items: flex-start;
+  background: #fff6f5;
+  border: 1px solid #f6c6c1;
+  border-radius: 14px;
+  color: #7a271a;
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 24px;
+}
+
+.module-error h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
 @media (max-width: 1180px) {
   .grid-5,
   .grid-6 {

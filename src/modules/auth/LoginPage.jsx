@@ -1,8 +1,33 @@
-import { ArrowRight, BrainCircuit, Eye, LockKeyhole, ShieldCheck, UserRound } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { ArrowRight, BrainCircuit, Eye, EyeOff, LockKeyhole, ShieldCheck, UserRound } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext.jsx';
 import './LoginPage.css';
 
 export function LoginPage() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+
+  const redirectTo = location.state?.from
+    ? `${location.state.from.pathname}${location.state.from.search}`
+    : '/dashboard/business-metrics';
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (!username.trim() || !password.trim()) {
+      setError('Enter a username and password to continue.');
+      return;
+    }
+    setError('');
+    login(username.trim());
+    navigate(redirectTo, { replace: true });
+  }
+
   return (
     <main className="login-page">
       <section className="login-panel">
@@ -11,16 +36,44 @@ export function LoginPage() {
           <strong>DayClaim.ai</strong>
         </Link>
 
-        <form className="login-form">
+        <form className="login-form" onSubmit={handleSubmit} noValidate>
           <label>
-            <span><UserRound size={14} /><input placeholder="Username" defaultValue="" /></span>
+            <span>
+              <UserRound size={14} />
+              <input
+                autoComplete="username"
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="Username"
+                value={username}
+              />
+            </span>
           </label>
           <label>
-            <span><LockKeyhole size={14} /><input placeholder="Password" defaultValue="" type="password" /><Eye size={15} /></span>
+            <span>
+              <LockKeyhole size={14} />
+              <input
+                autoComplete="current-password"
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+              />
+              <button
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="password-toggle"
+                onClick={() => setShowPassword((v) => !v)}
+                type="button"
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </span>
           </label>
-          <Link className="login-submit" to="/dashboard/business-metrics">
+
+          {error && <span className="field-error">{error}</span>}
+
+          <button className="login-submit" type="submit">
             Login <ArrowRight size={15} />
-          </Link>
+          </button>
         </form>
 
         <button className="reset-link" type="button">Reset Password</button>

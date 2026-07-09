@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import {
   AllocationDashboard,
   ArAnalytics,
@@ -11,13 +12,22 @@ import {
 } from '../pages/AdminDashboard.jsx';
 import { ModulePage } from './shared/ModulePage.jsx';
 
-const generatedModuleImports = import.meta.glob('./generated/**/index.jsx', { eager: true });
+// Config files are tiny and imported eagerly so route metadata (path/title/group)
+// is available synchronously for building the router. The page components
+// themselves (index.jsx) are loaded lazily, one chunk per module, so visiting
+// one module never pulls in the code for the other ~190 generated modules.
+const generatedConfigs = import.meta.glob('./generated/**/module.config.js', { eager: true });
+const generatedLoaders = import.meta.glob('./generated/**/index.jsx');
 
-const generatedPages = Object.fromEntries(
-  Object.values(generatedModuleImports)
-    .filter((module) => module.routePath && module.default)
-    .map((module) => [module.routePath, module.default]),
-);
+const generatedPages = {};
+Object.entries(generatedConfigs).forEach(([configPath, mod]) => {
+  const config = mod.moduleConfig;
+  if (!config?.path) return;
+  const indexPath = configPath.replace(/module\.config\.js$/, 'index.jsx');
+  const loader = generatedLoaders[indexPath];
+  if (!loader) return;
+  generatedPages[config.path] = lazy(() => loader());
+});
 
 const specialPages = {
   'Business Metrics': BusinessMetrics,

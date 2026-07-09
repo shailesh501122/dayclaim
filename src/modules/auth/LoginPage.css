@@ -139,6 +139,20 @@
   color: #8291a5;
 }
 
+.password-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #526072;
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+.login-form .field-error {
+  margin-top: -6px;
+}
+
 .login-submit {
   align-items: center;
   background: linear-gradient(135deg, var(--dayclaim), var(--dayclaim-dark));
