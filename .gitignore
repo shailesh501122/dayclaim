@@ -9,3 +9,11 @@ navbar-*.png
 uat-*.png
 .env
 .env.*
+!**/.env.example
+
+# .NET backend
+backend/.nuget/
+bin/
+obj/
+backend/docker/ccr-ca-bundle.crt
+docker/docker-compose.override.verify.yml

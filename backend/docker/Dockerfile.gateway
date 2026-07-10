@@ -1,0 +1,30 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+WORKDIR /src
+
+COPY Ascent.AR.sln ./
+COPY src/Ascent.AR.Domain/Ascent.AR.Domain.csproj src/Ascent.AR.Domain/
+COPY src/Ascent.AR.Application/Ascent.AR.Application.csproj src/Ascent.AR.Application/
+COPY src/Ascent.AR.Infrastructure/Ascent.AR.Infrastructure.csproj src/Ascent.AR.Infrastructure/
+COPY src/Ascent.AR.Api/Ascent.AR.Api.csproj src/Ascent.AR.Api/
+COPY src/Ascent.AR.Gateway/Ascent.AR.Gateway.csproj src/Ascent.AR.Gateway/
+COPY tests/Ascent.AR.UnitTests/Ascent.AR.UnitTests.csproj tests/Ascent.AR.UnitTests/
+RUN dotnet restore src/Ascent.AR.Gateway/Ascent.AR.Gateway.csproj
+
+COPY src/ src/
+
+RUN dotnet publish src/Ascent.AR.Gateway/Ascent.AR.Gateway.csproj -c Release -o /app --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
+WORKDIR /app
+
+RUN addgroup -S ascent && adduser -S ascent -G ascent
+USER ascent
+
+COPY --from=build --chown=ascent:ascent /app .
+
+ENV ASPNETCORE_URLS=http://+:8000
+EXPOSE 8000
+
+HEALTHCHECK --interval=15s --timeout=5s --retries=5 CMD wget -q -O- http://localhost:8000/gateway/health || exit 1
+
+ENTRYPOINT ["dotnet", "Ascent.AR.Gateway.dll"]
