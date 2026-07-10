@@ -12,20 +12,28 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const redirectTo = location.state?.from
     ? `${location.state.from.pathname}${location.state.from.search}`
     : '/dashboard/business-metrics';
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     if (!username.trim() || !password.trim()) {
       setError('Enter a username and password to continue.');
       return;
     }
     setError('');
-    login(username.trim());
-    navigate(redirectTo, { replace: true });
+    setSubmitting(true);
+    try {
+      await login(username.trim(), password);
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -71,8 +79,8 @@ export function LoginPage() {
 
           {error && <span className="field-error">{error}</span>}
 
-          <button className="login-submit" type="submit">
-            Login <ArrowRight size={15} />
+          <button className="login-submit" disabled={submitting} type="submit">
+            {submitting ? 'Signing in…' : <>Login <ArrowRight size={15} /></>}
           </button>
         </form>
 

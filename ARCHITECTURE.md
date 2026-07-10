@@ -1,9 +1,12 @@
 # DayClaim.ai Admin Panel — Architecture
 
-A static, front-end-only React admin panel (Vite + React Router) that renders
-~200 revenue-cycle-management modules from mock data. There is no backend in
-this repository — every "save", "approve", or "assign" action is a visual
-mock. Keep that in mind when reading the security section below.
+A React admin panel (Vite + React Router) that renders ~200
+revenue-cycle-management modules from mock data. Login is real — it
+authenticates against the DayClaim AR backend (separate repo:
+`DayclaimsBackendCore`) over `VITE_API_BASE_URL` — but every module's
+"save", "approve", or "assign" action beyond auth is still a visual mock
+against static data. Keep that in mind when reading the security section
+below.
 
 ## Layers
 
@@ -83,7 +86,10 @@ enforce, plus what to add before this becomes a real product:
 - `ProtectedRoute` blocks direct navigation to any module URL without a
   session and redirects back to `/login`, then returns the user to the page
   they asked for after login.
-- Login is a plain client-side form (no request goes anywhere yet).
+- Login calls the real backend (`POST /api/v1/auth/login`); the JWT
+  access/refresh tokens it returns are stored in `sessionStorage` alongside
+  the session. A failed login (wrong password, locked account, unreachable
+  API) shows the backend's actual error message.
 - Baseline HTTP security headers on the static deploy (`render.yaml`):
   `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`,
   `Permissions-Policy`, and a `Content-Security-Policy` restricted to
@@ -93,12 +99,16 @@ enforce, plus what to add before this becomes a real product:
   security property).
 
 **What this repo does NOT provide, and a real deployment must add:**
-- Real authentication — a backend must issue/verify a session or JWT.
-  `AuthContext.login()` currently accepts any non-empty username/password;
-  it is a UI placeholder, not an authorization check.
-- Role-based access control. `menuGroups` / routes are the same for every
-  user; RBAC (who can see/edit which module) has to be enforced server-side,
-  because anything client-side can be bypassed by calling APIs directly.
+- Role-based *menu/route* filtering. `menuGroups` / routes are the same for
+  every logged-in user regardless of their backend role — the backend
+  enforces RBAC on its own endpoints (see DayclaimsBackendCore's
+  `docs/SECURITY.md`), but this frontend doesn't yet hide/show modules based
+  on the roles returned at login, and none of the ~200 mock modules actually
+  call the backend for their data yet (only auth is wired up).
+- Access-token refresh. The backend issues a 15-minute access token plus a
+  rotating refresh token, but this frontend doesn't yet call
+  `/api/v1/auth/refresh` before the access token expires — a long-idle
+  session's stored token will simply go stale.
 - CSRF/XSS protections for real forms, input validation/sanitization for
   anything that becomes a real write path, and HTTPS/HSTS at the edge
   (Render terminates TLS, but confirm HSTS is enabled for the domain).

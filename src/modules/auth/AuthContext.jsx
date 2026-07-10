@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react';
+import { loginRequest, logoutRequest } from '../../api/authApi.js';
 
 const SESSION_KEY = 'dayclaim.session';
 const AuthContext = createContext(null);
@@ -18,12 +19,22 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({
     user: session,
     isAuthenticated: Boolean(session),
-    login(username) {
-      const next = { username, loginAt: new Date().toISOString() };
+    async login(username, password) {
+      const result = await loginRequest(username, password);
+      const next = {
+        username: result.displayName || username,
+        userId: result.userId,
+        roles: result.roles,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        accessTokenExpiresAtUtc: result.accessTokenExpiresAtUtc,
+        loginAt: new Date().toISOString(),
+      };
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(next));
       setSession(next);
     },
-    logout() {
+    async logout() {
+      await logoutRequest(session?.refreshToken);
       sessionStorage.removeItem(SESSION_KEY);
       setSession(null);
     },
