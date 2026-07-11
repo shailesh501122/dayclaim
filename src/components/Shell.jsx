@@ -5,7 +5,6 @@ import {
   BookOpen,
   BriefcaseBusiness,
   ChevronDown,
-  ChevronRight,
   ClipboardList,
   CreditCard,
   Database,
@@ -16,8 +15,6 @@ import {
   LogOut,
   Menu,
   Network,
-  PanelLeftClose,
-  PanelLeftOpen,
   PhoneCall,
   Radio,
   Search,
@@ -26,7 +23,6 @@ import {
   Sparkles,
   Star,
   UserCog,
-  UserRound,
   Users,
   Workflow,
   X,
@@ -70,39 +66,82 @@ function matchesQuery(label, query) {
   return label.toLowerCase().includes(query.trim().toLowerCase());
 }
 
-function SidebarGroup({ group, query, isOpen, onToggle, onNavigate }) {
+function DesktopMenuContent({ group, onNavigate }) {
+  if (group.mega) {
+    return (
+      <div className="dropdown-panel mega-menu">
+        {group.columns.map((column, index) => (
+          <div key={index} className="mega-column">
+            {column.map((item) => (
+              <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+                {item}
+              </NavLink>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (group.flyout) {
+    return (
+      <div className="dropdown-panel flyout-menu">
+        <div className="flyout-group">
+          <strong>Master 1</strong>
+          {group.columns[0].map((item) => (
+            <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+              {item}
+            </NavLink>
+          ))}
+        </div>
+        <div className="flyout-group secondary">
+          <strong>Master 2</strong>
+          {group.columns[1].map((item) => (
+            <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+              {item}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!group.items) return null;
+
+  return (
+    <div className="dropdown-panel simple-menu">
+      {group.items.map((item) => (
+        <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+          {item}
+        </NavLink>
+      ))}
+    </div>
+  );
+}
+
+function MobileMenuGroup({ group, isOpen, onToggle, onNavigate }) {
   const items = group.columns ? group.columns.flat() : group.items || [];
 
   if (group.direct) {
-    if (query && !matchesQuery(group.label, query)) return null;
     return (
-      <NavLink className="sidebar-link" onClick={onNavigate} to={getRouteForMenu(group)}>
+      <NavLink className="mobile-nav-link" onClick={onNavigate} to={getRouteForMenu(group)}>
         <ParentMenuIcon label={group.label} />
-        <span className="sidebar-label">{group.label}</span>
+        <span>{group.label}</span>
       </NavLink>
     );
   }
 
-  const filteredItems = query ? items.filter((item) => matchesQuery(item, query)) : items;
-  if (query && filteredItems.length === 0 && !matchesQuery(group.label, query)) return null;
-  const expanded = query ? true : isOpen;
-
   return (
-    <div className={`sidebar-group ${expanded ? 'is-open' : ''}`}>
-      <button
-        aria-expanded={expanded}
-        className="sidebar-group-toggle"
-        onClick={onToggle}
-        type="button"
-      >
+    <div className={`mobile-nav-group ${isOpen ? 'is-open' : ''}`}>
+      <button className="mobile-nav-group-toggle" onClick={onToggle} type="button">
         <ParentMenuIcon label={group.label} />
-        <span className="sidebar-label">{group.label}</span>
-        <ChevronRight className="sidebar-caret" size={14} />
+        <span>{group.label}</span>
+        <ChevronDown className="nav-caret" size={14} />
       </button>
-      {expanded && (
-        <div className="sidebar-subnav">
-          {(query ? filteredItems : items).map((item) => (
-            <NavLink className="sidebar-sublink" key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+      {isOpen && (
+        <div className="mobile-nav-subnav">
+          {items.map((item) => (
+            <NavLink className="mobile-nav-sublink" key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
               {item}
             </NavLink>
           ))}
@@ -113,96 +152,159 @@ function SidebarGroup({ group, query, isOpen, onToggle, onNavigate }) {
 }
 
 export function Shell({ children }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [openMenu, setOpenMenu] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openGroup, setOpenGroup] = useState(null);
+  const [mobileOpenGroup, setMobileOpenGroup] = useState(null);
   const [query, setQuery] = useState('');
   const location = useLocation();
   const { user, logout } = useAuth();
   const showFilterStrip = location.pathname.startsWith('/dashboard');
 
-  const closeMobile = () => setMobileOpen(false);
-
-  const toggleGroup = (label) => {
-    if (collapsed) setCollapsed(false);
-    setOpenGroup((current) => (current === label ? null : label));
+  const toggleMenu = (label, hasMenu) => {
+    if (!hasMenu) {
+      setOpenMenu(null);
+      return;
+    }
+    setOpenMenu((current) => (current === label ? null : label));
   };
 
-  const initials = useMemo(() => {
-    const name = user?.username || 'Admin';
-    return name.slice(0, 2).toUpperCase();
-  }, [user]);
+  const closeMobile = () => {
+    setMobileOpen(false);
+    setMobileOpenGroup(null);
+  };
+
+  const initials = useMemo(() => (user?.username || 'Admin').slice(0, 2).toUpperCase(), [user]);
+
+  const searchResults = useMemo(() => {
+    if (!query.trim()) return [];
+    const results = [];
+    menuGroups.forEach((group) => {
+      if (group.direct) {
+        if (matchesQuery(group.label, query)) {
+          results.push({ label: group.label, group: null, to: getRouteForMenu(group) });
+        }
+        return;
+      }
+      const items = group.columns ? group.columns.flat() : group.items || [];
+      items.forEach((item) => {
+        if (matchesQuery(item, query)) {
+          results.push({ label: item, group: group.label, to: getRouteForMenu(group, item) });
+        }
+      });
+    });
+    return results.slice(0, 10);
+  }, [query]);
 
   return (
-    <div className={`app ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'} ${showFilterStrip ? 'has-dashboard-filters' : 'no-dashboard-filters'}`}>
-      {mobileOpen && <button aria-label="Close menu" className="sidebar-backdrop" onClick={closeMobile} type="button" />}
+    <div className={`app ${showFilterStrip ? 'has-dashboard-filters' : 'no-dashboard-filters'}`}>
+      <div className="app-header">
+        <header className="topbar">
+          <div className="topbar-inner">
+            <Link className="brand" to="/dashboard/business-metrics">
+              <span className="brand-mark">DC</span>
+              <span className="brand-name">DayClaim.ai</span>
+            </Link>
 
-      <aside className={`sidebar ${mobileOpen ? 'is-mobile-open' : ''}`}>
-        <div className="sidebar-header">
-          <Link className="brand" onClick={closeMobile} to="/dashboard/business-metrics">
-            <span className="brand-mark">DC</span>
-            <span className="sidebar-label brand-name">DayClaim.ai</span>
-          </Link>
-          <button
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="sidebar-collapse-toggle"
-            onClick={() => setCollapsed((v) => !v)}
-            type="button"
-          >
-            {collapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
-          </button>
-          <button aria-label="Close menu" className="sidebar-close" onClick={closeMobile} type="button">
-            <X size={18} />
-          </button>
+            <div className="topbar-search">
+              <Search size={15} />
+              <input
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search modules..."
+                value={query}
+              />
+              {searchResults.length > 0 && (
+                <div className="search-results">
+                  {searchResults.map((result) => (
+                    <Link key={result.to} onClick={() => setQuery('')} to={result.to}>
+                      <span className="search-result-label">{result.label}</span>
+                      {result.group && <span className="search-result-group">{result.group}</span>}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="topbar-actions">
+              <button className="top-icon" aria-label="Notifications" type="button">
+                <Bell size={17} /><span>9</span>
+              </button>
+              <div className="user-chip">
+                <span className="user-avatar">{initials}</span>
+                <span className="user-name">{user?.username || 'Admin'}</span>
+              </div>
+              <button aria-label="Log out" className="top-icon" onClick={logout} type="button">
+                <LogOut size={17} />
+              </button>
+              <button aria-label="Open menu" className="mobile-menu-toggle" onClick={() => setMobileOpen(true)} type="button">
+                <Menu size={20} />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <nav className="menu-band" onMouseLeave={() => setOpenMenu(null)}>
+          <div className="menu-inner">
+            {menuGroups.map((group, index) => {
+              const hasMenu = !group.direct && (group.items || group.columns);
+              const isOpen = openMenu === group.label;
+              const alignRight = index > menuGroups.length - 6;
+              return (
+                <div
+                  className={`nav-item ${isOpen ? 'is-open' : ''} ${alignRight ? 'align-right' : ''}`}
+                  key={group.label}
+                  onMouseEnter={() => hasMenu && setOpenMenu(group.label)}
+                >
+                  {group.direct ? (
+                    <NavLink className="nav-link" onClick={() => setOpenMenu(null)} to={getRouteForMenu(group)}>
+                      <ParentMenuIcon label={group.label} />
+                      <span>{group.label}</span>
+                    </NavLink>
+                  ) : (
+                    <button
+                      aria-expanded={isOpen}
+                      aria-haspopup="menu"
+                      onClick={() => toggleMenu(group.label, hasMenu)}
+                      type="button"
+                    >
+                      <ParentMenuIcon label={group.label} />
+                      <span>{group.label}</span>
+                      <ChevronDown className="nav-caret" size={13} />
+                    </button>
+                  )}
+                  {isOpen && hasMenu && <DesktopMenuContent group={group} onNavigate={() => setOpenMenu(null)} />}
+                </div>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
+
+      {mobileOpen && (
+        <button aria-label="Close menu" className="mobile-drawer-backdrop" onClick={closeMobile} type="button" />
+      )}
+      <aside className={`mobile-drawer ${mobileOpen ? 'is-open' : ''}`}>
+        <div className="mobile-drawer-header">
+          <span className="brand-name">DayClaim.ai</span>
+          <button aria-label="Close menu" onClick={closeMobile} type="button"><X size={20} /></button>
         </div>
-
-        <div className="sidebar-search">
-          <Search size={14} />
-          <input
-            className="sidebar-label"
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search modules..."
-            value={query}
-          />
-        </div>
-
-        <nav className="sidebar-nav">
+        <nav className="mobile-drawer-nav">
           {menuGroups.map((group) => (
-            <SidebarGroup
+            <MobileMenuGroup
               group={group}
-              isOpen={openGroup === group.label}
+              isOpen={mobileOpenGroup === group.label}
               key={group.label}
               onNavigate={closeMobile}
-              onToggle={() => toggleGroup(group.label)}
-              query={query}
+              onToggle={() => setMobileOpenGroup((current) => (current === group.label ? null : group.label))}
             />
           ))}
         </nav>
-
-        <div className="sidebar-footer">
-          <button className="sidebar-icon-button" title="Notifications" type="button">
-            <Bell size={16} /><span className="badge-dot">9</span>
-          </button>
-          <div className="sidebar-user">
-            <span className="sidebar-avatar">{initials}</span>
-            <div className="sidebar-label sidebar-user-info">
-              <strong>{user?.username || 'Admin'}</strong>
-              <small>Signed in</small>
-            </div>
-          </div>
-          <button className="sidebar-icon-button" onClick={logout} title="Log out" type="button">
-            <LogOut size={16} />
-          </button>
+        <div className="mobile-drawer-footer">
+          <button onClick={logout} type="button"><LogOut size={16} /> Log out</button>
         </div>
       </aside>
 
-      <div className="app-main">
-        <button aria-label="Open menu" className="mobile-menu-toggle" onClick={() => setMobileOpen(true)} type="button">
-          <Menu size={18} />
-        </button>
-        {showFilterStrip && <FilterStrip />}
-        {children}
-      </div>
+      {showFilterStrip && <FilterStrip />}
+      {children}
     </div>
   );
 }
