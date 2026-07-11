@@ -5,6 +5,11 @@ services:
     branch: main
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    envVars:
+      # Vite bakes this in at build time (static sites have no server-side
+      # runtime env), so changing it requires a rebuild, not just a restart.
+      - key: VITE_API_BASE_URL
+        value: https://dayclaim-ar-api.onrender.com
     routes:
       - type: rewrite
         source: /*
@@ -24,8 +29,4 @@ services:
         value: camera=(), microphone=(), geolocation=()
       - path: /*
         name: Content-Security-Policy
-        # connect-src allows https: broadly because the DayClaim AR backend's
-        # production URL isn't fixed yet (VITE_API_BASE_URL is set at build
-        # time). Once the backend has a stable production origin, replace
-        # "https:" here with that exact origin to lock this back down.
-        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://dayclaim-ar-api.onrender.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
