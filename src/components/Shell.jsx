@@ -66,6 +66,29 @@ function matchesQuery(label, query) {
   return label.toLowerCase().includes(query.trim().toLowerCase());
 }
 
+// Admin sees every menu (hasMenuAccess always true for them); everyone else
+// only sees what an Admin has explicitly granted via User Management —
+// groups/columns with nothing visible left are dropped entirely rather than
+// rendered empty.
+function filterMenuGroups(groups, hasMenuAccess) {
+  return groups
+    .map((group) => {
+      if (group.direct) {
+        return hasMenuAccess(getRouteForMenu(group)) ? group : null;
+      }
+      if (group.columns) {
+        const columns = group.columns.map((column) => column.filter((item) => hasMenuAccess(getRouteForMenu(group, item))));
+        return columns.some((column) => column.length > 0) ? { ...group, columns } : null;
+      }
+      if (group.items) {
+        const items = group.items.filter((item) => hasMenuAccess(getRouteForMenu(group, item)));
+        return items.length > 0 ? { ...group, items } : null;
+      }
+      return null;
+    })
+    .filter(Boolean);
+}
+
 function DesktopMenuContent({ group, onNavigate }) {
   if (group.mega) {
     return (
@@ -157,8 +180,15 @@ export function Shell({ children }) {
   const [mobileOpenGroup, setMobileOpenGroup] = useState(null);
   const [query, setQuery] = useState('');
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, hasMenuAccess } = useAuth();
   const showFilterStrip = location.pathname.startsWith('/dashboard');
+
+  // hasMenuAccess gets a new identity from AuthContext whenever session/menuAccess
+  // changes, so depending on it alone is enough to re-derive at the right times.
+  const visibleMenuGroups = useMemo(
+    () => filterMenuGroups(menuGroups, hasMenuAccess),
+    [hasMenuAccess],
+  );
 
   const toggleMenu = (label, hasMenu) => {
     if (!hasMenu) {
@@ -178,7 +208,7 @@ export function Shell({ children }) {
   const searchResults = useMemo(() => {
     if (!query.trim()) return [];
     const results = [];
-    menuGroups.forEach((group) => {
+    visibleMenuGroups.forEach((group) => {
       if (group.direct) {
         if (matchesQuery(group.label, query)) {
           results.push({ label: group.label, group: null, to: getRouteForMenu(group) });
@@ -193,7 +223,7 @@ export function Shell({ children }) {
       });
     });
     return results.slice(0, 10);
-  }, [query]);
+  }, [query, visibleMenuGroups]);
 
   return (
     <div className={`app ${showFilterStrip ? 'has-dashboard-filters' : 'no-dashboard-filters'}`}>
@@ -244,10 +274,10 @@ export function Shell({ children }) {
 
         <nav className="menu-band" onMouseLeave={() => setOpenMenu(null)}>
           <div className="menu-inner">
-            {menuGroups.map((group, index) => {
+            {visibleMenuGroups.map((group, index) => {
               const hasMenu = !group.direct && (group.items || group.columns);
               const isOpen = openMenu === group.label;
-              const alignRight = index > menuGroups.length - 6;
+              const alignRight = index > visibleMenuGroups.length - 6;
               return (
                 <div
                   className={`nav-item ${isOpen ? 'is-open' : ''} ${alignRight ? 'align-right' : ''}`}
@@ -288,7 +318,7 @@ export function Shell({ children }) {
           <button aria-label="Close menu" onClick={closeMobile} type="button"><X size={20} /></button>
         </div>
         <nav className="mobile-drawer-nav">
-          {menuGroups.map((group) => (
+          {visibleMenuGroups.map((group) => (
             <MobileMenuGroup
               group={group}
               isOpen={mobileOpenGroup === group.label}

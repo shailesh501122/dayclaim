@@ -42,6 +42,7 @@ const specialPages = {
   'Escalation Dashboard': EscalationDashboard,
   'Inventory Overview': InventoryOverview,
   'User Role Management': UserManagement,
+  'Login Credentials': UserManagement,
 };
 
 export function RouteElement({ route }) {

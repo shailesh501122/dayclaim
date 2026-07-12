@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pencil, Plus, Power, PowerOff, RefreshCcw, Trash2 } from 'lucide-react';
+import { LayoutGrid, Pencil, Plus, Power, PowerOff, RefreshCcw, Trash2 } from 'lucide-react';
 import { useAuth } from '../modules/auth/AuthContext.jsx';
 import { activateUser, createUser, deactivateUser, deleteUser, fetchRoles, fetchUsers, updateUser } from '../api/usersApi.js';
+import { fetchUserMenuAccess, setUserMenuAccess } from '../api/menuAccessApi.js';
+import { getAllModuleRoutes } from '../routes/menuRoutes.js';
 import { StatusPill } from '../components/DataTable.jsx';
 import './UserManagement.css';
 
@@ -9,6 +11,15 @@ const ELEVATED_ROLES = ['Admin', 'Manager'];
 
 function emptyForm() {
   return { username: '', email: '', displayName: '', password: '', roleNames: [] };
+}
+
+function groupRoutes(routes) {
+  const groups = new Map();
+  routes.forEach((route) => {
+    if (!groups.has(route.group)) groups.set(route.group, []);
+    groups.get(route.group).push(route);
+  });
+  return [...groups.entries()];
 }
 
 export function UserManagement() {
@@ -25,6 +36,15 @@ export function UserManagement() {
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [submitting, setSubmitting] = useState(false);
+
+  const [menuModal, setMenuModal] = useState(null);
+  const [menuSelection, setMenuSelection] = useState(new Set());
+  const [menuLoading, setMenuLoading] = useState(false);
+  const [menuSaving, setMenuSaving] = useState(false);
+  const [menuError, setMenuError] = useState('');
+
+  const allRoutes = useMemo(() => getAllModuleRoutes(), []);
+  const routeGroups = useMemo(() => groupRoutes(allRoutes), [allRoutes]);
 
   async function load() {
     setLoading(true);
@@ -123,6 +143,54 @@ export function UserManagement() {
     }
   }
 
+  async function openMenus(u) {
+    setMenuModal({ user: u });
+    setMenuError('');
+    setMenuLoading(true);
+    try {
+      const paths = await fetchUserMenuAccess(u.id);
+      setMenuSelection(new Set(paths));
+    } catch (err) {
+      setMenuError(err.message);
+      setMenuSelection(new Set());
+    } finally {
+      setMenuLoading(false);
+    }
+  }
+
+  function toggleMenuPath(path) {
+    setMenuSelection((current) => {
+      const next = new Set(current);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  }
+
+  function toggleWholeGroup(routes, allSelected) {
+    setMenuSelection((current) => {
+      const next = new Set(current);
+      routes.forEach((route) => {
+        if (allSelected) next.delete(route.path);
+        else next.add(route.path);
+      });
+      return next;
+    });
+  }
+
+  async function handleSaveMenus() {
+    setMenuSaving(true);
+    setMenuError('');
+    try {
+      await setUserMenuAccess(menuModal.user.id, [...menuSelection]);
+      setMenuModal(null);
+    } catch (err) {
+      setMenuError(err.message);
+    } finally {
+      setMenuSaving(false);
+    }
+  }
+
   if (!canManageUsers) {
     return (
       <section className="section">
@@ -138,7 +206,7 @@ export function UserManagement() {
         <div>
           <span className="module-kicker">Role Management</span>
           <h1>User Management</h1>
-          <p>Create and manage staff accounts and role assignments. Changes apply immediately.</p>
+          <p>Create and manage staff accounts, role assignments, and which menus each user can see. Changes apply immediately.</p>
         </div>
         <div className="module-actions">
           <button className="ghost-button" onClick={load}><RefreshCcw size={15} /> Refresh</button>
@@ -183,6 +251,9 @@ export function UserManagement() {
                         <button title={u.isActive ? 'Deactivate' : 'Activate'} onClick={() => handleToggleActive(u)}>
                           {u.isActive ? <PowerOff size={14} /> : <Power size={14} />}
                         </button>
+                        {isAdmin && !u.roles.includes('Admin') && (
+                          <button title="Assign Menus" onClick={() => openMenus(u)}><LayoutGrid size={14} /></button>
+                        )}
                         {isAdmin && (
                           <button title="Delete" onClick={() => handleDelete(u)}><Trash2 size={14} /></button>
                         )}
@@ -245,6 +316,53 @@ export function UserManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {menuModal && (
+        <div className="overlay-backdrop" onClick={() => setMenuModal(null)}>
+          <div className="modal-card menu-assign-card" onClick={(e) => e.stopPropagation()}>
+            <h3>Assign Menus — {menuModal.user.displayName}</h3>
+            <p className="module-note">Only checked menus will be visible to this user. Admin accounts always see everything and aren't shown here.</p>
+            {menuLoading ? (
+              <p className="module-note">Loading current access...</p>
+            ) : (
+              <div className="menu-assign-scroll">
+                {routeGroups.map(([groupLabel, routes]) => {
+                  const allSelected = routes.every((route) => menuSelection.has(route.path));
+                  return (
+                    <div className="menu-assign-group" key={groupLabel}>
+                      <div className="menu-assign-group-header">
+                        <strong>{groupLabel}</strong>
+                        <button type="button" className="ghost-button small" onClick={() => toggleWholeGroup(routes, allSelected)}>
+                          {allSelected ? 'Clear all' : 'Select all'}
+                        </button>
+                      </div>
+                      <div className="role-checkboxes">
+                        {routes.map((route) => (
+                          <label key={route.path} className="role-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={menuSelection.has(route.path)}
+                              onChange={() => toggleMenuPath(route.path)}
+                            />
+                            {route.title}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {menuError && <p className="field-error">{menuError}</p>}
+            <div className="split">
+              <button type="button" className="ghost-button" onClick={() => setMenuModal(null)}>Cancel</button>
+              <button type="button" className="primary-button" disabled={menuSaving || menuLoading} onClick={handleSaveMenus}>
+                {menuSaving ? 'Saving...' : 'Save Menus'}
+              </button>
+            </div>
           </div>
         </div>
       )}
