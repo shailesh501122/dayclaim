@@ -9,9 +9,16 @@ import { RouteElement } from './modules/moduleRegistry.jsx';
 import { ModulePage } from './modules/shared/ModulePage.jsx';
 import { getAllModuleRoutes } from './routes/menuRoutes.js';
 
-function AdminLayout({ children }) {
+// Most of the ~200 generated modules are open to any authenticated staff
+// role; only a small number of real (non-placeholder) screens need a
+// narrower role check, listed here by their menu title.
+const ROUTE_ROLE_REQUIREMENTS = {
+  'User Role Management': ['Admin', 'Manager'],
+};
+
+function AdminLayout({ children, roles }) {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute roles={roles}>
       <Shell>
         <main className="content">{children}</main>
       </Shell>
@@ -21,7 +28,7 @@ function AdminLayout({ children }) {
 
 function ModuleRoute({ route }) {
   return (
-    <AdminLayout>
+    <AdminLayout roles={ROUTE_ROLE_REQUIREMENTS[route.title]}>
       <ModuleErrorBoundary resetKey={route.path}>
         <Suspense fallback={<div className="section module-loading">Loading module...</div>}>
           <RouteElement route={route} />

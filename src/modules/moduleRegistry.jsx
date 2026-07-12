@@ -10,6 +10,7 @@ import {
   PerformanceDashboard,
   RuleEngine,
 } from '../pages/AdminDashboard.jsx';
+import { UserManagement } from '../pages/UserManagement.jsx';
 import { ModulePage } from './shared/ModulePage.jsx';
 
 // Config files are tiny and imported eagerly so route metadata (path/title/group)
@@ -40,6 +41,7 @@ const specialPages = {
   'Performance Dashboard': PerformanceDashboard,
   'Escalation Dashboard': EscalationDashboard,
   'Inventory Overview': InventoryOverview,
+  'User Role Management': UserManagement,
 };
 
 export function RouteElement({ route }) {

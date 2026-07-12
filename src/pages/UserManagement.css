@@ -1,0 +1,59 @@
+.user-management .overlay-backdrop {
+  align-items: center;
+  background: rgba(15, 19, 42, 0.45);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 100;
+}
+
+.user-management .overlay-backdrop .modal-card {
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 92%;
+}
+
+.user-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.user-table th,
+.user-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.user-table thead th {
+  background: var(--table-head);
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.user-table tbody tr:hover {
+  background: var(--hover);
+}
+
+.role-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.role-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 6px;
+}
+
+.role-checkbox {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  width: auto;
+}

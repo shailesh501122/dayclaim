@@ -1,13 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-
-async function parseErrorMessage(response) {
-  try {
-    const body = await response.json();
-    return body.detail || body.title || `Request failed (${response.status})`;
-  } catch {
-    return `Request failed (${response.status})`;
-  }
-}
+import { API_BASE_URL, parseErrorMessage } from './apiClient.js';
 
 export async function loginRequest(username, password) {
   let response;
