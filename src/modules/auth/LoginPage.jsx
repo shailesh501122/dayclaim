@@ -16,7 +16,7 @@ export function LoginPage() {
 
   const redirectTo = location.state?.from
     ? `${location.state.from.pathname}${location.state.from.search}`
-    : '/dashboard/business-metrics';
+    : '/dashboard';
 
   async function handleSubmit(event) {
     event.preventDefault();

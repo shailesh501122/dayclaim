@@ -230,7 +230,7 @@ export function Shell({ children }) {
       <div className="app-header">
         <header className="topbar">
           <div className="topbar-inner">
-            <Link className="brand" to="/dashboard/business-metrics">
+            <Link className="brand" to="/dashboard">
               <span className="brand-mark">DC</span>
               <span className="brand-name">DayClaim.ai</span>
             </Link>
