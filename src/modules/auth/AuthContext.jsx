@@ -5,9 +5,12 @@ import { fetchMyMenuAccess } from '../../api/menuAccessApi.js';
 const SESSION_KEY = 'dayclaim.session';
 const AuthContext = createContext(null);
 
+// localStorage (not sessionStorage) so a session started in one tab is
+// visible to menu links opened in a new tab — sessionStorage is scoped
+// per-tab by the browser and was causing an immediate logout there.
 function readSession() {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -18,6 +21,17 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(readSession);
   const [menuAccess, setMenuAccess] = useState(null);
   const [menuAccessLoading, setMenuAccessLoading] = useState(Boolean(session));
+
+  // Keep tabs in sync: logging out (or in) in one tab reflects in others too.
+  useEffect(() => {
+    function onStorage(event) {
+      if (event.key === SESSION_KEY) {
+        setSession(readSession());
+      }
+    }
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,12 +68,12 @@ export function AuthProvider({ children }) {
         accessTokenExpiresAtUtc: result.accessTokenExpiresAtUtc,
         loginAt: new Date().toISOString(),
       };
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(next));
+      localStorage.setItem(SESSION_KEY, JSON.stringify(next));
       setSession(next);
     },
     async logout() {
       await logoutRequest(session?.refreshToken);
-      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_KEY);
       setSession(null);
       setMenuAccess(null);
     },

@@ -4,7 +4,7 @@ const SESSION_KEY = 'dayclaim.session';
 
 function readAccessToken() {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
     return raw ? JSON.parse(raw)?.accessToken : null;
   } catch {
     return null;
