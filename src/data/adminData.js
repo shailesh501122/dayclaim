@@ -11,43 +11,17 @@ export const colors = {
   info: '#2E90FA',
 };
 
+// Every item here maps to a real, backend-connected screen (see
+// moduleRegistry.jsx) — the much larger placeholder menu (Reports, Masters,
+// WFM, Knowledge Base, etc.) was removed until each of those is actually
+// built against a real API, rather than shipping fake data as if it were real.
 export const menuGroups = [
-  { label: 'Importer', items: ['Importer Setup', 'File Upload', 'TFL Importer Data', 'AFL Importer Data'] },
-  {
-    label: 'Reports',
-    mega: true,
-    columns: [
-      ['AI Assistance Reconciliation Report', 'AI Assistance Claim Status Report', 'Productivity Report - By Date', 'Efficiency Report - Rep Vs Date', 'FC & PayerWise Call History Report', 'Routing Processwise Report', 'Routing Production Report', 'Call History', 'ActiveCall', 'Calling Report by Employee'],
-      ['Team Coach Production Report', 'Encounter Summary', 'Live Allocation', 'Production Report', 'Inventory Report', 'Bucket Wise Production Report', 'Claim Assignment Report', 'Claim Touch Wise Report', 'Client Routing Summary', 'Logout Reason Report'],
-      ['Routing Report Date Wise', 'Priority By $Value Bucket', 'Priority Wise Production Report', 'Routing Summary', 'Production Target Report', 'SLA Tracking Report', 'Special Assignment Report', 'Summary # Report', 'Summary $ Report', 'Users Count Report', 'Bot Inventory'],
-    ],
-  },
-  {
-    label: 'Masters',
-    flyout: true,
-    columns: [
-      ['Employee Info', 'Employee Assignment', 'Process Master', 'Project Master', 'AR Category Master', 'Bank Master', 'Client Master', 'Division Master', 'Education Type Master', 'Employee Record Master', 'Holiday Master'],
-      ['Level Master', 'Level Designation Master', 'Nationality Master', 'ODC Master', 'Reason Master', 'Relationship Master', 'Reports Input Master', 'Software Master', 'Speciality Master', 'University Master', 'Work Station Master'],
-    ],
-  },
-  { label: 'Other', items: ['LIM Monthly', 'KPI Task Event Master', 'Master AR Category', 'Target Rampup', 'Login Credentials', 'Notifications', 'Live Allocation', 'Encounter Summary'] },
-  { label: 'Escalation Dashboard', direct: true },
-  { label: 'Role Management', items: ['Assign Role', 'User Role Access', 'Parent Node', 'Child Node', 'Sub Node', 'User Role Management', 'Add Landing Page'] },
-  { label: 'Smart Search', direct: true },
-  { label: 'Best Case', direct: true },
-  { label: 'Call Center Analytics Dashboard', direct: true },
-  { label: 'AI Assistance', items: ['Scheduler Settings', 'Jobs Dashboard', 'Notification Settings', 'UHC API'] },
-  { label: 'Dashboard', items: ['Business Metrics', 'Project Info', 'KPI Metrics', 'Forecast Reports', 'AR Analytics', 'Payment Trend by Age', 'Allocation Dashboard', 'Inventory Overview'] },
+  { label: 'Dashboard', direct: true },
   { label: 'Rule Engine', direct: true },
-  { label: 'WFM', items: ['WFM Setup', 'Manual Assignment', 'Manual Assignment Approval', 'Assignment Approval', 'Auto Allocation Setup', 'Special Assignment', 'Rollback Claims', 'Allocation Dashboard', 'Hourly Distribution', 'Employee Target'] },
-  { label: 'Knowledge Base', items: ['Audio/Video Upload', 'SOP/Document Upload', 'Escalation Tracker', 'Update Tracker', 'Denial & Remark Code Master', 'CPT Category', 'Status and Action', 'Payer Contact Details'] },
-  { label: 'Notes', items: ['Questionnaire', 'Scenario Master', 'Scenario'] },
-  { label: 'Live Allocation', items: ['Live Allocation WFM Wise', 'Live Allocation User Wise'] },
-  { label: 'Payment Trend by Age', direct: true },
-  { label: 'DayClaim Reports', items: ['VOIP Dashboard', 'Allocation Summary', 'Denial Summary', 'Inventory Summary', 'Production Summary', 'Open Inventory', 'Payer Mix', 'AR Rollover and Inflow'] },
-  { label: 'ATB Reports', items: ['ATB', 'ATB - Last Action', 'ATB Trend'] },
-  { label: 'Client Reports', items: ['VOIP Dashboard', 'Appeal Analysis', 'Payer Mix', 'Open Inventory', 'Inventory Summary', 'Allocation Summary', 'Production Summary'] },
-  { label: 'Manual Production', items: ['Manual Production', 'Manual Production Approval'] },
+  { label: 'Importer', items: ['Importer Setup'] },
+  { label: 'Notes', items: ['Scenario Master'] },
+  { label: 'Role Management', items: ['User Role Management'] },
+  { label: 'Other', items: ['Login Credentials'] },
 ];
 
 export const months = ['Apr-25', 'May-25', 'Jun-25', 'Jul-25', 'Aug-25', 'Sep-25', 'Oct-25', 'Nov-25', 'Dec-25', 'Jan-26', 'Feb-26', 'Mar-26'];

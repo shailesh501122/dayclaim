@@ -1,0 +1,91 @@
+.real-screen .module-actions select {
+  border: 1px solid #E0DEF0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.real-card-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.real-card-grid .card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.real-card-grid h3 {
+  margin: 0 0 4px;
+}
+
+.stat-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 4px;
+}
+
+.stat-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-row span {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stat-row strong {
+  font-size: 22px;
+}
+
+.breakdown-list {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breakdown-list li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.breakdown-list li:last-child {
+  border-bottom: none;
+}
+
+.field-mapping-row {
+  align-items: end;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 8px;
+  padding: 10px;
+}
+
+.field-mapping-row .checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
+.field-mapping-row .checkboxes label {
+  align-items: center;
+  display: flex;
+  font-size: 12px;
+  gap: 5px;
+}
