@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 import {
   Bell,
   Bot,
@@ -26,35 +26,35 @@ import {
   Users,
   Workflow,
   X,
-} from 'lucide-react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useAuth } from '../modules/auth/AuthContext.jsx';
-import { menuGroups } from '../data/adminData.js';
-import { getRouteForMenu } from '../routes/menuRoutes.js';
-import './Shell.css';
+} from "lucide-react";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { useAuth } from "../modules/auth/AuthContext.jsx";
+import { menuGroups } from "../data/adminData.js";
+import { getRouteForMenu } from "../routes/menuRoutes.js";
+import "./Shell.css";
 
 const parentMenuIcons = {
   Importer: FileInput,
   Reports: FileBarChart,
   Masters: Database,
   Other: BriefcaseBusiness,
-  'Escalation Dashboard': ShieldCheck,
-  'Role Management': UserCog,
-  'Smart Search': Search,
-  'Best Case': Star,
-  'Call Center Analytics Dashboard': PhoneCall,
-  'AI Assistance': Bot,
+  "Escalation Dashboard": ShieldCheck,
+  "Role Management": UserCog,
+  "Smart Search": Search,
+  "Best Case": Star,
+  "Call Center Analytics Dashboard": PhoneCall,
+  "AI Assistance": Bot,
   Dashboard: LayoutDashboard,
-  'Rule Engine': GitBranch,
+  "Rule Engine": GitBranch,
   WFM: Workflow,
-  'Knowledge Base': BookOpen,
+  "Knowledge Base": BookOpen,
   Notes: ClipboardList,
-  'Live Allocation': Radio,
-  'Payment Trend by Age': CreditCard,
-  'DayClaim Reports': Sparkles,
-  'ATB Reports': FileBarChart,
-  'Client Reports': Users,
-  'Manual Production': Network,
+  "Live Allocation": Radio,
+  "Payment Trend by Age": CreditCard,
+  "DayClaim Reports": Sparkles,
+  "ATB Reports": FileBarChart,
+  "Client Reports": Users,
+  "Manual Production": Network,
 };
 
 function ParentMenuIcon({ label }) {
@@ -76,11 +76,17 @@ function filterMenuGroups(groups, hasMenuAccess) {
         return hasMenuAccess(getRouteForMenu(group)) ? group : null;
       }
       if (group.columns) {
-        const columns = group.columns.map((column) => column.filter((item) => hasMenuAccess(getRouteForMenu(group, item))));
-        return columns.some((column) => column.length > 0) ? { ...group, columns } : null;
+        const columns = group.columns.map((column) =>
+          column.filter((item) => hasMenuAccess(getRouteForMenu(group, item))),
+        );
+        return columns.some((column) => column.length > 0)
+          ? { ...group, columns }
+          : null;
       }
       if (group.items) {
-        const items = group.items.filter((item) => hasMenuAccess(getRouteForMenu(group, item)));
+        const items = group.items.filter((item) =>
+          hasMenuAccess(getRouteForMenu(group, item)),
+        );
         return items.length > 0 ? { ...group, items } : null;
       }
       return null;
@@ -95,7 +101,11 @@ function DesktopMenuContent({ group, onNavigate }) {
         {group.columns.map((column, index) => (
           <div key={index} className="mega-column">
             {column.map((item) => (
-              <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+              <NavLink
+                key={item}
+                onClick={onNavigate}
+                to={getRouteForMenu(group, item)}
+              >
                 {item}
               </NavLink>
             ))}
@@ -111,7 +121,11 @@ function DesktopMenuContent({ group, onNavigate }) {
         <div className="flyout-group">
           <strong>Master Group 1</strong>
           {group.columns[0].map((item) => (
-            <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+            <NavLink
+              key={item}
+              onClick={onNavigate}
+              to={getRouteForMenu(group, item)}
+            >
               {item}
             </NavLink>
           ))}
@@ -119,7 +133,11 @@ function DesktopMenuContent({ group, onNavigate }) {
         <div className="flyout-group secondary">
           <strong>Master Group 2</strong>
           {group.columns[1].map((item) => (
-            <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+            <NavLink
+              key={item}
+              onClick={onNavigate}
+              to={getRouteForMenu(group, item)}
+            >
               {item}
             </NavLink>
           ))}
@@ -133,7 +151,11 @@ function DesktopMenuContent({ group, onNavigate }) {
   return (
     <div className="dropdown-panel simple-menu">
       {group.items.map((item) => (
-        <NavLink key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+        <NavLink
+          key={item}
+          onClick={onNavigate}
+          to={getRouteForMenu(group, item)}
+        >
           {item}
         </NavLink>
       ))}
@@ -146,7 +168,11 @@ function MobileMenuGroup({ group, isOpen, onToggle, onNavigate }) {
 
   if (group.direct) {
     return (
-      <NavLink className="mobile-nav-link" onClick={onNavigate} to={getRouteForMenu(group)}>
+      <NavLink
+        className="mobile-nav-link"
+        onClick={onNavigate}
+        to={getRouteForMenu(group)}
+      >
         <ParentMenuIcon label={group.label} />
         <span>{group.label}</span>
       </NavLink>
@@ -154,8 +180,12 @@ function MobileMenuGroup({ group, isOpen, onToggle, onNavigate }) {
   }
 
   return (
-    <div className={`mobile-nav-group ${isOpen ? 'is-open' : ''}`}>
-      <button className="mobile-nav-group-toggle" onClick={onToggle} type="button">
+    <div className={`mobile-nav-group ${isOpen ? "is-open" : ""}`}>
+      <button
+        className="mobile-nav-group-toggle"
+        onClick={onToggle}
+        type="button"
+      >
         <ParentMenuIcon label={group.label} />
         <span>{group.label}</span>
         <ChevronDown className="nav-caret" size={14} />
@@ -163,7 +193,12 @@ function MobileMenuGroup({ group, isOpen, onToggle, onNavigate }) {
       {isOpen && (
         <div className="mobile-nav-subnav">
           {items.map((item) => (
-            <NavLink className="mobile-nav-sublink" key={item} onClick={onNavigate} to={getRouteForMenu(group, item)}>
+            <NavLink
+              className="mobile-nav-sublink"
+              key={item}
+              onClick={onNavigate}
+              to={getRouteForMenu(group, item)}
+            >
               {item}
             </NavLink>
           ))}
@@ -177,10 +212,10 @@ export function Shell({ children }) {
   const [openMenu, setOpenMenu] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileOpenGroup, setMobileOpenGroup] = useState(null);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const location = useLocation();
   const { user, logout, hasMenuAccess } = useAuth();
-  const showFilterStrip = location.pathname.includes('/dashboard');
+  const showFilterStrip = location.pathname.includes("/dashboard");
 
   const visibleMenuGroups = useMemo(
     () => filterMenuGroups(menuGroups, hasMenuAccess),
@@ -200,7 +235,10 @@ export function Shell({ children }) {
     setMobileOpenGroup(null);
   };
 
-  const initials = useMemo(() => (user?.username || 'Admin').slice(0, 2).toUpperCase(), [user]);
+  const initials = useMemo(
+    () => (user?.username || "Admin").slice(0, 2).toUpperCase(),
+    [user],
+  );
 
   const searchResults = useMemo(() => {
     if (!query.trim()) return [];
@@ -208,14 +246,22 @@ export function Shell({ children }) {
     visibleMenuGroups.forEach((group) => {
       if (group.direct) {
         if (matchesQuery(group.label, query)) {
-          results.push({ label: group.label, group: null, to: getRouteForMenu(group) });
+          results.push({
+            label: group.label,
+            group: null,
+            to: getRouteForMenu(group),
+          });
         }
         return;
       }
       const items = group.columns ? group.columns.flat() : group.items || [];
       items.forEach((item) => {
         if (matchesQuery(item, query)) {
-          results.push({ label: item, group: group.label, to: getRouteForMenu(group, item) });
+          results.push({
+            label: item,
+            group: group.label,
+            to: getRouteForMenu(group, item),
+          });
         }
       });
     });
@@ -223,13 +269,15 @@ export function Shell({ children }) {
   }, [query, visibleMenuGroups]);
 
   return (
-    <div className={`app ${showFilterStrip ? 'has-dashboard-filters' : 'no-dashboard-filters'}`}>
+    <div
+      className={`app ${showFilterStrip ? "has-dashboard-filters" : "no-dashboard-filters"}`}
+    >
       <div className="app-header">
         <header className="topbar">
           <div className="topbar-inner">
-            <Link className="brand" title="A$cent Health Home" to="/dashboard">
-              <span className="brand-mark">A$</span>
-              <span className="brand-name">A$cent Health</span>
+            <Link className="brand" title="DayClaim Home" to="/dashboard">
+              <span className="brand-mark">D</span>
+              <span className="brand-name">DayClaim</span>
             </Link>
 
             <div className="topbar-search">
@@ -242,9 +290,22 @@ export function Shell({ children }) {
               {searchResults.length > 0 && (
                 <div className="search-results">
                   {searchResults.map((result) => (
-                    <Link key={result.to} onClick={() => { setQuery(''); setOpenMenu(null); }} to={result.to}>
-                      <span className="search-result-label">{result.label}</span>
-                      {result.group && <span className="search-result-group">{result.group}</span>}
+                    <Link
+                      key={result.to}
+                      onClick={() => {
+                        setQuery("");
+                        setOpenMenu(null);
+                      }}
+                      to={result.to}
+                    >
+                      <span className="search-result-label">
+                        {result.label}
+                      </span>
+                      {result.group && (
+                        <span className="search-result-group">
+                          {result.group}
+                        </span>
+                      )}
                     </Link>
                   ))}
                 </div>
@@ -252,17 +313,33 @@ export function Shell({ children }) {
             </div>
 
             <div className="topbar-actions">
-              <button className="top-icon" aria-label="Notifications" type="button">
-                <Bell size={17} /><span>9</span>
+              <button
+                className="top-icon"
+                aria-label="Notifications"
+                type="button"
+              >
+                <Bell size={17} />
+                <span>9</span>
               </button>
               <div className="user-chip">
                 <span className="user-avatar">{initials}</span>
-                <span className="user-name">{user?.username || 'Admin'}</span>
+                <span className="user-name">{user?.username || "Admin"}</span>
               </div>
-              <button aria-label="Log out" className="top-icon" onClick={logout} title="Log out" type="button">
+              <button
+                aria-label="Log out"
+                className="top-icon"
+                onClick={logout}
+                title="Log out"
+                type="button"
+              >
                 <LogOut size={17} />
               </button>
-              <button aria-label="Open menu" className="mobile-menu-toggle" onClick={() => setMobileOpen(true)} type="button">
+              <button
+                aria-label="Open menu"
+                className="mobile-menu-toggle"
+                onClick={() => setMobileOpen(true)}
+                type="button"
+              >
                 <Menu size={20} />
               </button>
             </div>
@@ -277,12 +354,16 @@ export function Shell({ children }) {
               const alignRight = index > visibleMenuGroups.length - 6;
               return (
                 <div
-                  className={`nav-item ${isOpen ? 'is-open' : ''} ${alignRight ? 'align-right' : ''}`}
+                  className={`nav-item ${isOpen ? "is-open" : ""} ${alignRight ? "align-right" : ""}`}
                   key={group.label}
                   onMouseEnter={() => hasMenu && setOpenMenu(group.label)}
                 >
                   {group.direct ? (
-                    <NavLink className="nav-link" onClick={() => setOpenMenu(null)} to={getRouteForMenu(group)}>
+                    <NavLink
+                      className="nav-link"
+                      onClick={() => setOpenMenu(null)}
+                      to={getRouteForMenu(group)}
+                    >
                       <ParentMenuIcon label={group.label} />
                       <span>{group.label}</span>
                     </NavLink>
@@ -298,7 +379,12 @@ export function Shell({ children }) {
                       <ChevronDown className="nav-caret" size={13} />
                     </button>
                   )}
-                  {isOpen && hasMenu && <DesktopMenuContent group={group} onNavigate={() => setOpenMenu(null)} />}
+                  {isOpen && hasMenu && (
+                    <DesktopMenuContent
+                      group={group}
+                      onNavigate={() => setOpenMenu(null)}
+                    />
+                  )}
                 </div>
               );
             })}
@@ -307,12 +393,19 @@ export function Shell({ children }) {
       </div>
 
       {mobileOpen && (
-        <button aria-label="Close menu" className="mobile-drawer-backdrop" onClick={closeMobile} type="button" />
+        <button
+          aria-label="Close menu"
+          className="mobile-drawer-backdrop"
+          onClick={closeMobile}
+          type="button"
+        />
       )}
-      <aside className={`mobile-drawer ${mobileOpen ? 'is-open' : ''}`}>
+      <aside className={`mobile-drawer ${mobileOpen ? "is-open" : ""}`}>
         <div className="mobile-drawer-header">
-          <span className="brand-name">A$cent Health</span>
-          <button aria-label="Close menu" onClick={closeMobile} type="button"><X size={20} /></button>
+          <span className="brand-name">DayClaim</span>
+          <button aria-label="Close menu" onClick={closeMobile} type="button">
+            <X size={20} />
+          </button>
         </div>
         <nav className="mobile-drawer-nav">
           {visibleMenuGroups.map((group) => (
@@ -321,12 +414,18 @@ export function Shell({ children }) {
               isOpen={mobileOpenGroup === group.label}
               key={group.label}
               onNavigate={closeMobile}
-              onToggle={() => setMobileOpenGroup((current) => (current === group.label ? null : group.label))}
+              onToggle={() =>
+                setMobileOpenGroup((current) =>
+                  current === group.label ? null : group.label,
+                )
+              }
             />
           ))}
         </nav>
         <div className="mobile-drawer-footer">
-          <button onClick={logout} type="button"><LogOut size={16} /> Log out</button>
+          <button onClick={logout} type="button">
+            <LogOut size={16} /> Log out
+          </button>
         </div>
       </aside>
 
@@ -337,7 +436,13 @@ export function Shell({ children }) {
 }
 
 export function FilterStrip() {
-  const filters = ['CBO', 'Sub Speciality', 'Office Key', 'Group Code', 'Group Name'];
+  const filters = [
+    "CBO",
+    "Sub Speciality",
+    "Office Key",
+    "Group Code",
+    "Group Name",
+  ];
   return (
     <section className="filter-strip">
       <div className="filter-row">
@@ -348,7 +453,9 @@ export function FilterStrip() {
             <ChevronDown size={14} />
           </button>
         ))}
-        <button className="filter-clear" title="Clear filters"><SlidersHorizontal size={16} /></button>
+        <button className="filter-clear" title="Clear filters">
+          <SlidersHorizontal size={16} />
+        </button>
         <div className="toggle-group">
           <button>YTD</button>
           <button className="active">MTD</button>
@@ -358,7 +465,11 @@ export function FilterStrip() {
         <span className="label">Date filter</span>
         <input type="date" defaultValue="2026-03-01" />
         <input type="date" defaultValue="2026-03-28" />
-        {['Today', 'WTD', 'MTD', 'QTD', 'YTD', 'Last 13 Months'].map((preset) => <button key={preset}>{preset}</button>)}
+        {["Today", "WTD", "MTD", "QTD", "YTD", "Last 13 Months"].map(
+          (preset) => (
+            <button key={preset}>{preset}</button>
+          ),
+        )}
       </div>
     </section>
   );

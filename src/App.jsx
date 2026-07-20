@@ -1,14 +1,20 @@
-import { Suspense, useEffect } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { ModuleErrorBoundary } from './components/ErrorBoundary.jsx';
-import { Shell } from './components/Shell.jsx';
-import { AuthProvider } from './modules/auth/AuthContext.jsx';
-import { LoginPage } from './modules/auth/LoginPage.jsx';
-import { ProtectedRoute } from './modules/auth/ProtectedRoute.jsx';
-import { RouteElement } from './modules/moduleRegistry.jsx';
-import { ModulePage } from './pages/ModulePage.jsx';
-import { getAllModuleRoutes } from './routes/menuRoutes.js';
-import './styles/global.css';
+import { Suspense, useEffect } from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
+import { ModuleErrorBoundary } from "./components/ErrorBoundary.jsx";
+import { Shell } from "./components/Shell.jsx";
+import { AuthProvider } from "./modules/auth/AuthContext.jsx";
+import { LoginPage } from "./modules/auth/LoginPage.jsx";
+import { ProtectedRoute } from "./modules/auth/ProtectedRoute.jsx";
+import { RouteElement } from "./modules/moduleRegistry.jsx";
+import { ModulePage } from "./pages/ModulePage.jsx";
+import { getAllModuleRoutes } from "./routes/menuRoutes.js";
+import "./styles/global.css";
 
 /**
  * AdminLayout provides the protected shell for all internal pages.
@@ -31,16 +37,19 @@ function ModuleRoute({ route }) {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Standardize page titles with A$cent branding
     if (route) {
-      document.title = `${route.title} | A$cent Health Admin`;
+      document.title = `${route.title} | DayClaim Admin`;
     }
   }, [route, pathname]);
 
   return (
     <AdminLayout menuPath={route.path}>
       <ModuleErrorBoundary resetKey={route.path}>
-        <Suspense fallback={<div className="section module-loading">Loading module data...</div>}>
+        <Suspense
+          fallback={
+            <div className="section module-loading">Loading module data...</div>
+          }
+        >
           <RouteElement route={route} />
         </Suspense>
       </ModuleErrorBoundary>
@@ -61,20 +70,24 @@ export default function App() {
           {/* Default to login, then redirect to Dashboard */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
-          
+
           {/* Dynamic Module Routes from menuRegistry */}
           {moduleRoutes.map((route) => (
-            <Route key={route.path} path={route.path} element={<ModuleRoute route={route} />} />
+            <Route
+              key={route.path}
+              path={route.path}
+              element={<ModuleRoute route={route} />}
+            />
           ))}
-          
+
           {/* High-fidelity Fallback Page */}
-          <Route 
-            path="*" 
+          <Route
+            path="*"
             element={
               <AdminLayout>
-                <ModulePage title="Page Not Found" group="A$cent Health" />
+                <ModulePage title="Page Not Found" group="DayClaim" />
               </AdminLayout>
-            } 
+            }
           />
         </Routes>
       </AuthProvider>
