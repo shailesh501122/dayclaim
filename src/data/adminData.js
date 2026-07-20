@@ -231,3 +231,110 @@ export const notifications = [
   { group: 'Yesterday', title: 'Rule engine completed', text: '12,077 claims routed to calling queues.', time: '1d ago' },
   { group: 'Earlier', title: 'Password policy updated', text: 'Admin password expiry changed to 45 days.', time: '3d ago' },
 ];
+
+export const dailyProduction = months.map((month, index) => ({
+  month,
+  charges: 800 + index * 50 + (index % 3) * 20,
+  payments: 750 + index * 45,
+  collection: 92 + index * 0.5,
+}));
+
+export const denialCodes = [
+  { name: 'CO-16: Info Missing', value: 88 },
+  { name: 'CO-97: Duplicate', value: 76 },
+  { name: 'CO-27: Coverage', value: 64 },
+  { name: 'CO-197: Pre-cert', value: 52 },
+  { name: 'CO-18: Duplicate', value: 48 },
+  { name: 'CO-15: Auth Required', value: 42 },
+  { name: 'CO-22: Coordination', value: 38 },
+  { name: 'CO-4: Procedure Mod', value: 34 },
+  { name: 'CO-50: Medical Nec', value: 28 },
+  { name: 'CO-1: Ded/Coins', value: 22 },
+];
+
+export const payerCategory = [
+  { name: 'Commercial', value: 52, fill: colors.brand },
+  { name: 'Medicare', value: 24, fill: colors.primary },
+  { name: 'Medicaid', value: 14, fill: colors.violet2 },
+  { name: 'Self Pay', value: 10, fill: colors.teal },
+];
+
+export const reportConfigs = {
+  'Inventory Summary': {
+    kpis: [
+      { label: 'Total Claims', value: '48,213', delta: '+1.2%', tone: 'green', spark: [40, 45, 42, 48, 50, 47, 52] },
+      { label: 'Open AR Value', value: '$23.4M', delta: '-0.8%', tone: 'green', invert: true, spark: [25, 24, 26, 23, 22, 24, 23] },
+      { label: 'Avg Ageing Days', value: '46', delta: '+2', tone: 'red', invert: true, spark: [42, 44, 45, 43, 46, 47, 46] },
+      { label: 'Workable %', value: '72.1%', delta: '+3.4%', tone: 'green', spark: [65, 68, 70, 69, 71, 73, 72] },
+    ],
+    charts: [
+      { type: 'donut', title: 'AR by Payer Category', dataKey: 'payerCategory' },
+      { type: 'bar', title: 'Ageing Waterfall', dataKey: 'arBuckets', xKey: 'bucket', bars: ['value'] },
+    ],
+    columns: [
+      { key: 'client', label: 'Client' },
+      { key: 'claims', label: 'Open Claims', numeric: true },
+      { key: 'open', label: 'Open $', numeric: true },
+      { key: 'age', label: 'Avg Age', numeric: true },
+      { key: 'old', label: '120+ %', numeric: true },
+      { key: 'workable', label: 'Workable %', numeric: true },
+      { key: 'import', label: 'Last Import' },
+      { key: 'fresh', label: 'Freshness', type: 'status', filter: 'select' },
+    ],
+  },
+  'Production Summary': {
+    kpis: [
+      { label: 'Claims Worked', value: '12,847', delta: '+5.6%', tone: 'green', spark: [110, 115, 120, 118, 125, 130, 128] },
+      { label: 'Total Touched $', value: '$9.2M', delta: '+12%', tone: 'green', spark: [8, 8.5, 9, 8.8, 9.5, 10, 9.2] },
+      { label: 'QC Pass Rate', value: '98.4%', delta: '+0.2%', tone: 'green', spark: [97, 97.5, 98, 97.8, 98.2, 98.5, 98.4] },
+      { label: 'Avg Handle Time', value: '6m 12s', delta: '-18s', tone: 'green', invert: true, spark: [7, 6.8, 6.5, 6.7, 6.4, 6.2, 6.2] },
+    ],
+    charts: [
+      { type: 'combo', title: 'Daily Production vs Target', dataKey: 'dailyProduction' },
+    ],
+    columns: [
+      { key: 'sr', label: 'S.No.', numeric: true },
+      { key: 'owner', label: 'Employee' },
+      { key: 'empId', label: 'Code', numeric: true },
+      { key: 'client', label: 'Client' },
+      { key: 'jobDate', label: 'JobDate' },
+      { key: 'total', label: 'Worked', numeric: true },
+      { key: 'efficiency', label: 'Efficiency %', numeric: true },
+      { key: 'status', label: 'Status', type: 'status' },
+    ],
+  },
+  'Denial Summary': {
+    kpis: [
+      { label: 'Total Denials', value: '3,412', delta: '+4%', tone: 'red', spark: [30, 32, 35, 33, 36, 38, 34] },
+      { label: 'Denial Value', value: '$1.8M', delta: '+8%', tone: 'red', spark: [1.5, 1.6, 1.8, 1.7, 1.9, 2.0, 1.8] },
+      { label: 'Recovery Rate', value: '64%', delta: '+2%', tone: 'green', spark: [60, 62, 63, 61, 64, 66, 64] },
+      { label: 'Top Reason', value: 'CO-97', delta: 'Duplicate', tone: 'indigo' },
+    ],
+    charts: [
+      { type: 'hbar', title: 'Top 10 Denial Codes', dataKey: 'denialCodes' },
+    ],
+    columns: [
+      { key: 'id', label: 'Encounter' },
+      { key: 'client', label: 'Client' },
+      { key: 'payer', label: 'Payer' },
+      { key: 'balance', label: 'Denial Amount', numeric: true },
+      { key: 'priority', label: 'Severity', type: 'priority' },
+      { key: 'status', label: 'Workflow', type: 'status' },
+      { key: 'updated', label: 'Denial Date' },
+    ],
+  },
+};
+
+export const reportDataMap = {
+  'Inventory Summary': inventoryRows,
+  'Production Summary': performanceRows.map((r) => ({ ...r, total: r.claims, efficiency: r.ach, status: 'Completed', jobDate: '2026-03-28' })),
+  'Denial Summary': Array.from({ length: 10 }, (_, i) => ({
+    id: `ENC-${2026}-${10428 + i}`,
+    client: ['Austin Heart Group', 'NorthStar Ortho', 'Lakeside GI'][i % 3],
+    payer: ['UHC Choice Plus', 'BCBS of TX', 'Aetna PPO'][i % 3],
+    balance: `$${(840 + i * 120).toLocaleString()}.00`,
+    priority: `P${(i % 3) + 1}`,
+    status: ['New Denial', 'In Review', 'Appealed'][i % 3],
+    updated: '2026-03-28',
+  })),
+};

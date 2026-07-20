@@ -130,7 +130,7 @@ export function Shell({ children }) {
   return (
     <div className={`app ${showFilterStrip ? 'has-dashboard-filters' : 'no-dashboard-filters'}`}>
       <header className="topbar">
-        <Link className="brand" to="/dashboard/business-metrics">DayClaim.ai</Link>
+        <Link className="brand" to="/dashboard/business-metrics">A$cent Health</Link>
         <div className="topbar-actions">
           <button className="top-icon" aria-label="Notifications"><Bell size={17} /><span>9</span></button>
           <button className="top-icon" aria-label="Messages"><Mail size={17} /></button>

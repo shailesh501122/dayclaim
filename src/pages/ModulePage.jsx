@@ -7,22 +7,31 @@ import {
   Search,
 } from 'lucide-react';
 import { DataTable, ProgressCell } from '../components/DataTable.jsx';
+import { StatCard, DonutCard, HorizontalBars, ComboChart, SimpleBarChart } from '../components/Charts.jsx';
+import * as data from '../data/adminData.js';
 
-const payerNames = ['UHC Choice Plus', 'BCBS of TX', 'Cigna Open Access', 'Aetna PPO', 'Medicare TX', 'Humana Gold'];
-const owners = ['Ananya Iyer', 'Rahul Menon', 'Priya S', 'Neha R', 'Vikram Rao', 'Amit K'];
-const clients = ['Austin Heart Group', 'NorthStar Ortho', 'Lakeside GI', 'Metro Urology'];
-const departments = ['AR', 'Appeal', 'Payment Posting', 'Coding', 'Patient Calling', 'Client', 'Adjustment'];
-
+/**
+ * Categorize modules based on their title and group to determine layout patterns.
+ */
 function getModuleKind(group, title) {
   const text = `${group} ${title}`.toLowerCase();
-  if (text.includes('master') || text.includes('employee info') || text.includes('role management')) return 'master';
-  if (text.includes('report') || text.includes('analytics') || text.includes('dashboard') || text.includes('trend')) return 'report';
+  if (text.includes('master') || text.includes('setup') || text.includes('role management')) return 'master';
+  if (text.includes('report') || text.includes('analytics') || text.includes('dashboard') || text.includes('trend') || text.includes('summary')) return 'report';
   if (text.includes('import') || text.includes('upload') || text.includes('batch')) return 'import';
-  if (text.includes('assignment') || text.includes('allocation') || text.includes('wfm') || text.includes('production')) return 'worklist';
+  if (text.includes('assignment') || text.includes('allocation') || text.includes('wfm')) return 'worklist';
   return 'module';
 }
 
-function buildRows(title, kind) {
+/**
+ * Fetch rows based on module title, fallback to generic generator.
+ */
+function getRows(title, kind) {
+  if (data.reportDataMap[title]) return data.reportDataMap[title];
+  
+  const owners = ['Ananya Iyer', 'Rahul Menon', 'Priya S', 'Neha R', 'Vikram Rao', 'Amit K'];
+  const clients = ['Austin Heart Group', 'NorthStar Ortho', 'Lakeside GI', 'Metro Urology'];
+  const departments = ['AR', 'Appeal', 'Payment Posting', 'Coding', 'Patient Calling', 'Client', 'Adjustment'];
+
   return Array.from({ length: 15 }, (_, index) => {
     const amount = 8420 + index * 6187;
     const name = owners[index % owners.length];
@@ -39,7 +48,7 @@ function buildRows(title, kind) {
       role: ['User', 'Supervisor', 'Quality Manager', ''][index % 4],
       encounter: `ENC-2026-${104382 + index * 73}`,
       client: clients[index % clients.length],
-      payer: payerNames[index % payerNames.length],
+      payer: ['UHC Choice Plus', 'BCBS of TX', 'Cigna Open Access', 'Aetna PPO'][index % 4],
       owner: name,
       jobDate: `2026-03-${String(28 - (index % 18)).padStart(2, '0')}`,
       balance: `$${amount.toLocaleString('en-US')}.00`,
@@ -53,12 +62,17 @@ function buildRows(title, kind) {
       fileName: `${title.replace(/\s+/g, '_')}_${String(index + 1).padStart(2, '0')}.xlsx`,
       passed: (8400 + index * 122).toLocaleString('en-US'),
       failed: 12 + index * 3,
-      kind,
     };
   });
 }
 
-function getColumns(kind) {
+/**
+ * Resolve columns for the module.
+ */
+function getColumns(title, kind) {
+  const config = data.reportConfigs[title];
+  if (config?.columns) return config.columns;
+
   if (kind === 'master') {
     return [
       { key: 'sr', label: 'SR.NO.', numeric: true },
@@ -90,20 +104,6 @@ function getColumns(kind) {
     ];
   }
 
-  if (kind === 'import') {
-    return [
-      { key: 'id', label: 'Batch ID' },
-      { key: 'fileName', label: 'File Name' },
-      { key: 'client', label: 'Client' },
-      { key: 'owner', label: 'Uploaded By' },
-      { key: 'updated', label: 'Upload Date' },
-      { key: 'passed', label: 'Passed', numeric: true },
-      { key: 'failed', label: 'Failed', numeric: true },
-      { key: 'status', label: 'Status', type: 'status', filter: 'select' },
-      { key: 'actions', label: 'Action' },
-    ];
-  }
-
   return [
     { key: 'id', label: 'Record ID' },
     { key: 'encounter', label: 'Encounter #' },
@@ -112,78 +112,77 @@ function getColumns(kind) {
     { key: 'owner', label: 'Owner' },
     { key: 'balance', label: 'Balance', numeric: true },
     { key: 'priority', label: 'Priority', type: 'priority', filter: 'select' },
-    { key: 'age', label: 'Ageing', filter: 'select', render: (value) => <span className="pill pill-indigo">{value}</span> },
-    { key: 'completion', label: 'Completion', numeric: true, render: (value) => <ProgressCell value={Math.min(value, 96)} /> },
     { key: 'status', label: 'Status', type: 'status', filter: 'select' },
     { key: 'updated', label: 'Updated' },
     { key: 'actions', label: 'Actions' },
   ];
 }
 
+/**
+ * Filter and Control Panel with context-aware inputs.
+ */
 function ModuleControlPanel({ kind, title }) {
-  if (kind === 'master') {
-    return (
-      <div className="card module-control-card">
-        <div className="module-control-title">
-          <div><strong>{title} Setup</strong><span>Project and master data maintenance</span></div>
-          <button className="primary-button"><Save size={15} /> Save</button>
-        </div>
-        <div className="module-control-grid master-grid">
-          <label><span>Project Name</span><select><option>Please Select</option><option>Austin Heart Group</option><option>NorthStar Ortho</option></select></label>
-          <label><span>Status</span><select><option>Active</option><option>Inactive</option></select></label>
-          <label><span>Search</span><input placeholder={`Search ${title}`} /></label>
-          <label><span>Upload File</span><input type="file" /></label>
-        </div>
-        <p className="module-note">Note: For new project setup, configure client, speciality, practice, payer, provider, CPT, and transition team details.</p>
-      </div>
-    );
-  }
-
-  if (kind === 'report') {
-    return (
-      <div className="card module-control-card">
-        <div className="module-control-title">
-          <div><strong>{title} Filters</strong><span>Run report by date, department, manager, supervisor, and user</span></div>
-          <button className="primary-button"><Search size={15} /> Search</button>
-        </div>
-        <div className="module-control-grid report-grid">
-          <label><span>From Date</span><input type="date" defaultValue="2026-07-08" /></label>
-          <label><span>To Date</span><input type="date" defaultValue="2026-07-08" /></label>
-          <label><span>Department</span><select><option>None selected</option><option>AR</option><option>Payment Posting</option><option>Coding</option></select></label>
-          <label><span>Type</span><select><option>Select</option><option>Manager</option><option>Supervisor</option></select></label>
-          <label><span>Supervisor</span><select><option>None selected</option><option>Priya S</option><option>Rahul M</option></select></label>
-          <label><span>User</span><select><option>None selected</option><option>Ananya Iyer</option><option>Meera Nair</option></select></label>
-        </div>
-        <div className="module-radio-row">
-          <label><input type="radio" name={`${title}-metric`} defaultChecked /> Production</label>
-          <label><input type="radio" name={`${title}-metric`} /> Efficiency</label>
-          <label><input type="radio" name={`${title}-process`} defaultChecked /> Process</label>
-          <label><input type="radio" name={`${title}-process`} /> Sub Process</label>
-        </div>
-      </div>
-    );
-  }
-
+  const isMaster = kind === 'master';
+  
   return (
     <div className="card module-control-card">
       <div className="module-control-title">
-        <div><strong>{title} Filters</strong><span>Use the common work queue controls before loading records</span></div>
-        <button className="primary-button"><Filter size={15} /> Filter</button>
+        <div>
+          <strong>{title} {isMaster ? 'Setup' : 'Filters'}</strong>
+          <span>{isMaster ? 'Manage system configurations and masters' : 'Refine data results with professional criteria'}</span>
+        </div>
+        <button className="primary-button">
+          {isMaster ? <Save size={15} /> : <Search size={15} />}
+          {' '}
+          {isMaster ? 'Save' : 'Search'}
+        </button>
       </div>
-      <div className="module-control-grid">
-        <label><span>Client</span><select><option>None selected</option><option>Austin Heart Group</option></select></label>
-        <label><span>Payer</span><select><option>None selected</option><option>UHC Choice Plus</option><option>BCBS of TX</option></select></label>
-        <label><span>Priority</span><select><option>All</option><option>P1</option><option>P2</option><option>P3</option></select></label>
-        <label><span>Date</span><input type="date" defaultValue="2026-07-08" /></label>
+      <div className={`module-control-grid ${isMaster ? 'master-grid' : ''}`}>
+        <label><span>Client</span><select><option>None selected</option><option>Austin Heart Group</option><option>NorthStar Ortho</option></select></label>
+        {isMaster ? (
+          <>
+            <label><span>Status</span><select><option>Active</option><option>Inactive</option></select></label>
+            <label><span>Search Term</span><input placeholder={`Find ${title}...`} /></label>
+            <label><span>Config File</span><input type="file" /></label>
+          </>
+        ) : (
+          <>
+            <label><span>Payer Category</span><select><option>All</option><option>Commercial</option><option>Medicare</option><option>Medicaid</option></select></label>
+            <label><span>Supervisor</span><select><option>None selected</option><option>Priya S</option><option>Rahul M</option></select></label>
+            <label><span>Date Range</span><input type="date" defaultValue="2026-07-08" /></label>
+          </>
+        )}
       </div>
+      {isMaster && <p className="module-note">Note: Updates to master records impact system-wide routing and reporting logic.</p>}
     </div>
   );
 }
 
+/**
+ * Helper to render appropriate charts based on configuration.
+ */
+function AnalyticsRenderer({ type, title, dataKey, xKey, bars }) {
+  const chartData = data[dataKey];
+  if (!chartData) return null;
+
+  switch (type) {
+    case 'donut': return <DonutCard title={title} data={chartData} />;
+    case 'bar': return <SimpleBarChart title={title} data={chartData} xKey={xKey} bars={bars} />;
+    case 'combo': return <ComboChart data={chartData} />;
+    case 'hbar': return <HorizontalBars title={title} data={chartData} pivots={false} />;
+    default: return null;
+  }
+}
+
+/**
+ * Main Smart Module Page component.
+ */
 export function ModulePage({ title, group }) {
   const kind = getModuleKind(group, title);
-  const rows = buildRows(title, kind);
-  const columns = getColumns(kind);
+  const rows = getRows(title, kind);
+  const columns = getColumns(title, kind);
+  const config = data.reportConfigs[title];
+
   const addLabel = kind === 'master' ? `New ${title.replace(/ Master$/i, '')}` : kind === 'report' ? 'Run Report' : 'Add Record';
 
   return (
@@ -192,7 +191,7 @@ export function ModulePage({ title, group }) {
         <div>
           <span className="module-kicker">{group}</span>
           <h1>{title}</h1>
-          <p>Manage records with UAT-style filters, actions, exports, search, pagination, and dummy healthcare AR data.</p>
+          <p>Advanced AR management interface featuring industry-standard controls and high-fidelity analytics.</p>
         </div>
         <div className="module-actions">
           <button className="ghost-button"><RefreshCcw size={15} /> Refresh</button>
@@ -203,8 +202,30 @@ export function ModulePage({ title, group }) {
 
       <ModuleControlPanel kind={kind} title={title} />
 
+      {config?.kpis && (
+        <div className="grid grid-4 section">
+          {config.kpis.map((kpi) => (
+            <StatCard key={kpi.label} {...kpi} />
+          ))}
+        </div>
+      )}
+
+      {config?.charts && (
+        <div className={`grid grid-${config.charts.length > 1 ? '2' : '1'} section`}>
+          {config.charts.map((chart, idx) => (
+            <AnalyticsRenderer key={idx} {...chart} />
+          ))}
+        </div>
+      )}
+
       <div className="section">
-        <DataTable title={`${title} ${kind === 'report' ? 'Result' : 'List'}`} columns={columns} rows={rows} filteredText="1,701" totalText="12,847" />
+        <DataTable 
+          title={`${title} ${kind === 'report' ? 'Result' : 'List'}`} 
+          columns={columns} 
+          rows={rows} 
+          filteredText={rows.length.toLocaleString()} 
+          totalText={(rows.length * 12.4).toFixed(0).toLocaleString()} 
+        />
       </div>
     </section>
   );

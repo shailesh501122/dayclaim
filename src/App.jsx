@@ -1,35 +1,44 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Shell } from './components/Shell.jsx';
-import { LoginPage } from './modules/auth/LoginPage.jsx';
 import { RouteElement } from './modules/moduleRegistry.jsx';
-import { ModulePage } from './modules/shared/ModulePage.jsx';
 import { getAllModuleRoutes } from './routes/menuRoutes.js';
+import './styles/global.css';
 
-function AdminLayout({ children }) {
+const routes = getAllModuleRoutes();
+
+function App() {
+  const { pathname } = useLocation();
+  const currentRoute = routes.find((r) => r.path === pathname);
+
+  useEffect(() => {
+    // Update document title to match industry level branding
+    if (currentRoute) {
+      document.title = `${currentRoute.title} | A$cent Health Admin`;
+    } else if (pathname === '/') {
+      document.title = 'Dashboard | A$cent Health Admin';
+    } else {
+      document.title = 'A$cent Health Admin';
+    }
+  }, [currentRoute, pathname]);
+
   return (
     <Shell>
-      <main className="content">{children}</main>
+      <main className="content">
+        {currentRoute ? (
+          <RouteElement route={currentRoute} />
+        ) : (
+          <div className="empty-page-state">
+            <h1 className="page-title">Welcome to A$cent Health Admin Panel</h1>
+            <p>Industry-leading Revenue Cycle Management and AR Analytics system.</p>
+            <div className="card" style={{ marginTop: '2rem', padding: '2rem', textAlign: 'center' }}>
+              <p className="muted">Select a module from the sidebar or top navigation to begin managing your RCM operations.</p>
+            </div>
+          </div>
+        )}
+      </main>
     </Shell>
   );
 }
 
-export default function App() {
-  const moduleRoutes = getAllModuleRoutes();
-
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        {moduleRoutes.map((route) => (
-          <Route
-            key={route.path}
-            path={route.path}
-            element={<AdminLayout><RouteElement route={route} /></AdminLayout>}
-          />
-        ))}
-        <Route path="*" element={<AdminLayout><ModulePage title="Page Not Found" group="DayClaim.ai" /></AdminLayout>} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
+export default App;

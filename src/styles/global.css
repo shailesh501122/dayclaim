@@ -57,10 +57,55 @@ button {
 }
 
 .page-title {
-  color: var(--brand-2);
-  font-size: 26px;
+  color: var(--brand);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin: 0 0 20px;
+}
+
+.empty-page-state {
+  margin: 40px auto;
+  max-width: 800px;
+  text-align: center;
+}
+
+.empty-page-state h1 {
+  color: var(--brand);
+  font-size: 32px;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.empty-page-state p {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.ghost-button.sm {
+  font-size: 11px;
+  min-height: 28px;
+  padding: 4px 10px;
+}
+
+.badge-count {
+  background: var(--violet4);
+  border: 1px solid var(--violet3);
+  border-radius: 999px;
+  color: var(--brand);
+  font-size: 10px;
   font-weight: 800;
-  margin: 0 0 14px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
+/* Tooltip and utility classes for high fidelity */
+[title] {
+  cursor: help;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 .section-title {
